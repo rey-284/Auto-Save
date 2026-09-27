@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f3e8">
+  <title>Campus Dash | A student driving game</title>
+  <script>window.location.replace('campus-dash.html');</script>
+  <noscript><meta http-equiv="refresh" content="0;url=campus-dash.html"></noscript>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700;800&display=swap');
+
+    :root {
+      color-scheme: light;
+      --ink: #14251f;
+      --muted: #718078;
+      --line: #e1e7df;
+      --paper: #f4f5ef;
+      --white: #fff;
+      --green: #b7f269;
+      --green-dark: #183526;
+      --orange: #f18c5e;
+      --mono: 'DM Mono', monospace;
+      --sans: 'DM Sans', sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background-color: var(--paper);
+      background-image: radial-gradient(#dbe2d8 0.7px, transparent 0.7px);
+      background-size: 17px 17px;
+      font-family: var(--sans);
+    }
+
+    button { font: inherit; }
+
+    .shell { max-width: 1180px; margin: 0 auto; padding: 0 40px 42px; }
+
+    .topbar {
+      height: 82px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand { display: flex; gap: 11px; align-items: center; font-size: 15px; font-weight: 800; letter-spacing: 0; }
+    .brand-mark { width: 31px; height: 31px; display: grid; place-items: center; border-radius: 9px; background: var(--green); font-size: 16px; }
+    .brand small { display: block; margin-top: 2px; color: var(--muted); font: 10px var(--mono); letter-spacing: 0; }
+    .top-meta { display: flex; align-items: center; gap: 24px; color: var(--muted); font: 11px var(--mono); }
+    .top-meta strong { color: var(--ink); font-weight: 500; }
+    .saved-count { display: flex; align-items: center; gap: 7px; }
+    .saved-mark { width: 8px; height: 8px; border-radius: 50%; background: var(--orange); }
+
+    .view-nav { display: flex; gap: 5px; margin: 22px 0 0; border-bottom: 1px solid var(--line); }
+    .view-nav a { display: inline-flex; align-items: center; gap: 8px; margin-bottom: -1px; padding: 11px 14px; border-bottom: 2px solid transparent; color: var(--muted); text-decoration: none; font-size: 12px; font-weight: 600; }
+    .view-nav a[aria-current="page"] { border-bottom-color: #5d8a4d; color: var(--ink); }
+    .nav-count { min-width: 19px; height: 19px; display: grid; place-items: center; border-radius: 10px; color: #47623e; background: #e7f1df; font: 10px var(--mono); }
+    [hidden] { display: none !important; }
+
+    .playbook-head { display: flex; justify-content: space-between; align-items: end; gap: 20px; margin: 34px 0 27px; }
+    .playbook-head h1 { margin: 0; }
+    .playbook-head p { max-width: 450px; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+    .playbook-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(260px, .85fr); gap: 36px; align-items: start; }
+    .section-heading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 13px; }
+    .section-heading h2 { margin: 0; font-size: 17px; font-weight: 700; }
+    .section-heading span { color: var(--muted); font: 10px var(--mono); text-transform: uppercase; }
+    .saved-offers { display: grid; gap: 9px; }
+    .saved-offer { display: grid; grid-template-columns: 1fr auto; gap: 7px 16px; padding: 16px; border: 1px solid var(--line); border-radius: 6px; background: #fff; }
+    .saved-offer-top { display: flex; align-items: center; gap: 9px; }
+    .saved-offer-top .carrier-symbol { width: 26px; height: 26px; flex: 0 0 26px; }
+    .saved-offer-title { font-size: 13px; font-weight: 700; }
+    .saved-offer-vehicle { margin-top: 3px; color: var(--muted); font-size: 11px; }
+    .saved-offer-price { align-self: center; color: var(--green-dark); font-size: 20px; font-weight: 700; white-space: nowrap; }
+    .saved-offer-price small { color: var(--muted); font-size: 10px; font-weight: 400; }
+    .saved-offer-details { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px 15px; padding-top: 8px; border-top: 1px solid #edf0eb; color: var(--muted); font: 10px var(--mono); }
+    .remove-offer { grid-column: 2; justify-self: end; padding: 3px 0; border: 0; color: #758078; background: transparent; cursor: pointer; font-size: 10px; }
+    .remove-offer:hover { color: #a24f3d; }
+    .empty-state { padding: 24px 18px; border: 1px dashed #cbd5c9; border-radius: 6px; color: var(--muted); background: #fafbf8; font-size: 12px; line-height: 1.6; }
+    .coverage-guide { border-top: 2px solid var(--green-dark); }
+    .guide-item { padding: 14px 0; border-bottom: 1px solid var(--line); }
+    .guide-item h3 { margin: 0 0 5px; font-size: 12px; }
+    .guide-item p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.55; }
+    .guide-note { margin-top: 13px; color: #78837a; font-size: 10px; line-height: 1.55; }
+    .playbook-notice { margin-top: 27px; color: #7f8981; font-size: 10px; line-height: 1.6; }
+
+    main { padding-top: 49px; }
+    .intro { display: flex; justify-content: space-between; align-items: end; gap: 25px; margin-bottom: 29px; }
+    .eyebrow { display: flex; align-items: center; gap: 9px; margin-bottom: 12px; color: #587063; font: 11px var(--mono); text-transform: uppercase; }
+    .live-dot { width: 7px; height: 7px; border-radius: 50%; background: #60b977; box-shadow: 0 0 0 3px #dceede; }
+    h1 { margin: 0; font-size: clamp(29px, 4vw, 43px); line-height: 1.05; letter-spacing: 0; font-weight: 700; }
+    .intro-note { padding-bottom: 4px; color: var(--muted); font-size: 13px; }
+    .intro-note strong { color: var(--ink); }
+
+    .sprint-strip { display: flex; align-items: center; gap: 20px; min-height: 61px; padding: 12px 18px; border: 1px solid var(--line); border-bottom: 0; border-radius: 8px 8px 0 0; background: #fbfcf8; }
+    .round-label { min-width: 100px; color: var(--muted); font: 10px var(--mono); text-transform: uppercase; }
+    .round-label strong { display: block; margin-top: 4px; color: var(--ink); font-size: 12px; font-weight: 500; }
+    .progress { display: flex; flex: 1; gap: 7px; }
+    .progress span { height: 5px; flex: 1; border-radius: 10px; background: #e5eae2; transition: background 240ms ease; }
+    .progress span.filled { background: #6d9d65; }
+    .best-score { min-width: 130px; color: var(--muted); text-align: right; font: 10px var(--mono); text-transform: uppercase; }
+    .best-score strong { color: var(--ink); font-size: 12px; font-weight: 500; }
+
+    .policy-card { display: grid; grid-template-columns: 1.12fr 0.88fr; min-height: 405px; overflow: hidden; border: 1px solid var(--line); border-radius: 0 0 8px 8px; background: var(--white); box-shadow: 0 15px 40px #263b2c0a; }
+    .policy-info { padding: 31px 34px 27px; }
+    .carrier-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .carrier { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; }
+    .carrier-symbol { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; color: #fff; background: var(--green-dark); font-size: 12px; }
+    .demo-tag { padding: 6px 8px; border: 1px solid #efdfd4; border-radius: 4px; color: #a75c3d; background: #fff8f2; font: 9px var(--mono); text-transform: uppercase; white-space: nowrap; }
+    .price-row { display: flex; align-items: end; gap: 8px; margin: 26px 0 5px; }
+    .price { font-size: 55px; line-height: 0.95; font-weight: 700; letter-spacing: 0; }
+    .per-month { padding-bottom: 5px; color: var(--muted); font-size: 13px; }
+    .annual { color: var(--muted); font-size: 12px; }
+    .divider { height: 1px; margin: 22px 0 18px; background: var(--line); }
+    .coverage-title { margin: 0 0 13px; font: 10px var(--mono); color: var(--muted); text-transform: uppercase; }
+    .coverage-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 13px 20px; }
+    .coverage-item { display: flex; justify-content: space-between; gap: 8px; font-size: 11px; }
+    .coverage-item span { color: var(--muted); }
+    .coverage-item strong { font-size: 11px; font-weight: 600; text-align: right; }
+    .deductible-chip { display: inline-flex; margin-top: 17px; padding: 6px 9px; border-radius: 4px; color: #53635a; background: #f1f5ee; font: 10px var(--mono); }
+
+    .vehicle-panel { position: relative; min-height: 405px; display: flex; align-items: end; padding: 25px; color: #fff; background: #33433a; isolation: isolate; }
+    .vehicle-panel::before { content: ''; position: absolute; z-index: -2; inset: 0; background-image: url('https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1300&q=85'); background-size: cover; background-position: center; transition: transform 500ms ease; }
+    .vehicle-panel::after { content: ''; position: absolute; z-index: -1; inset: 0; background: linear-gradient(180deg, #101b1a00 23%, #101b1acc 100%), linear-gradient(90deg, #101b1a2b, transparent 70%); }
+    .vehicle-copy { width: 100%; }
+    .location { display: inline-flex; gap: 7px; align-items: center; padding: 7px 9px; border: 1px solid #ffffff55; border-radius: 4px; color: #fff; background: #15221d66; font: 10px var(--mono); backdrop-filter: blur(8px); }
+    .vehicle-name { margin: 13px 0 5px; font-size: 25px; line-height: 1.1; font-weight: 600; }
+    .vehicle-detail { color: #e5ebe5cc; font-size: 12px; }
+    .vehicle-index { position: absolute; top: 20px; right: 20px; padding: 7px 9px; border: 1px solid #ffffff55; border-radius: 4px; background: #15221d66; font: 10px var(--mono); backdrop-filter: blur(8px); }
+
+    .action-row { display: flex; align-items: center; gap: 10px; margin-top: 19px; }
+    .next-button, .save-button { min-height: 49px; border: 0; border-radius: 5px; cursor: pointer; transition: transform 140ms ease, background 140ms ease, box-shadow 140ms ease; }
+    .next-button { display: flex; flex: 1; justify-content: space-between; align-items: center; padding: 0 18px; color: var(--green-dark); background: var(--green); font-size: 14px; font-weight: 700; }
+    .next-button:hover { background: #c7ff7b; box-shadow: 0 5px 18px #5f9e3e24; transform: translateY(-1px); }
+    .next-button:active, .save-button:active { transform: translateY(1px); }
+    .next-button:focus-visible, .save-button:focus-visible { outline: 3px solid #608c55; outline-offset: 3px; }
+    .arrow { font: 17px var(--mono); }
+    .save-button { min-width: 139px; padding: 0 14px; border: 1px solid var(--line); color: var(--ink); background: #fff; font-size: 12px; font-weight: 600; }
+    .save-button:hover { background: #f5f8f2; }
+    .save-button[aria-pressed="true"] { border-color: #a4ce79; color: #315c32; background: #f1f9e8; }
+    .save-icon { margin-right: 6px; font-size: 15px; }
+
+    .challenge-panel { margin-top: 16px; padding: 19px 21px; border: 1px solid var(--line); border-left: 3px solid #86b45d; border-radius: 6px; background: #fbfcf8; }
+    .challenge-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .challenge-kicker { color: #587063; font: 10px var(--mono); text-transform: uppercase; }
+    .challenge-score { color: var(--muted); font: 10px var(--mono); }
+    .challenge-score strong { color: var(--ink); }
+    .challenge-scenario { margin: 13px 0 5px; font-size: 14px; font-weight: 600; line-height: 1.5; }
+    .challenge-question { margin: 0; color: var(--muted); font-size: 11px; }
+    .answer-options { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .answer-option { min-height: 36px; padding: 0 12px; border: 1px solid #dce4d9; border-radius: 4px; color: #34473a; background: #fff; cursor: pointer; font-size: 11px; font-weight: 600; }
+    .answer-option:hover:not(:disabled) { border-color: #8cad77; background: #f1f7eb; }
+    .answer-option:focus-visible { outline: 3px solid #608c55; outline-offset: 2px; }
+    .answer-option:disabled { cursor: default; }
+    .answer-option.correct { border-color: #8fbe73; color: #2a6030; background: #eff8e9; }
+    .answer-option.incorrect { border-color: #dfa18b; color: #884a38; background: #fff3ee; }
+    .challenge-feedback { min-height: 18px; margin: 11px 0 0; color: #53635a; font-size: 11px; line-height: 1.5; }
+    .challenge-feedback[data-result="correct"] { color: #376638; }
+    .challenge-feedback[data-result="incorrect"] { color: #95533e; }
+
+    .below { display: flex; justify-content: space-between; gap: 18px; padding-top: 14px; color: var(--muted); font: 10px var(--mono); }
+    .below strong { color: #506259; font-weight: 500; }
+    .notice { margin-top: 26px; color: #7f8981; text-align: center; font-size: 10px; line-height: 1.6; }
+    .flash { animation: reveal 340ms ease both; }
+    @keyframes reveal { from { opacity: .4; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 760px) {
+      .shell { padding: 0 20px 30px; }
+      .topbar { height: 70px; }
+      .top-meta { gap: 12px; }
+      .top-meta .round-top { display: none; }
+      main { padding-top: 34px; }
+      .view-nav { margin-top: 12px; }
+      .intro { align-items: start; flex-direction: column; gap: 10px; margin-bottom: 22px; }
+      .intro-note { padding: 0; }
+      .sprint-strip { gap: 12px; padding: 11px 12px; }
+      .round-label { min-width: 71px; font-size: 9px; }
+      .best-score { min-width: 93px; font-size: 9px; }
+      .progress { gap: 4px; }
+      .policy-card { grid-template-columns: 1fr; }
+      .policy-info { padding: 24px 22px; }
+      .vehicle-panel { min-height: 260px; order: -1; }
+      .price { font-size: 49px; }
+      .below { flex-direction: column; gap: 5px; }
+      .playbook-head { align-items: start; flex-direction: column; gap: 9px; margin: 25px 0 21px; }
+      .playbook-grid { grid-template-columns: 1fr; gap: 28px; }
+    }
+
+    @media (max-width: 430px) {
+      .shell { padding-right: 14px; padding-left: 14px; }
+      h1 { font-size: 31px; }
+      .policy-info { padding: 21px 17px; }
+      .coverage-grid { gap: 12px 9px; }
+      .coverage-item { font-size: 10px; }
+      .coverage-item strong { font-size: 10px; }
+      .save-button { min-width: 115px; padding: 0 9px; }
+      .action-row { gap: 7px; }
+      .demo-tag { font-size: 8px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">C</span>
+        <span>CAMPUS COVER<small>AUTO INSURANCE, MADE CLEAR</small></span>
+      </div>
+      <div class="top-meta">
+        <span class="round-top">ROUND <strong id="roundTop">01</strong></span>
+        <span class="saved-count"><i class="saved-mark" aria-hidden="true"></i><strong id="savedCount">0</strong> SAVED</span>
+      </div>
+    </header>
+
+    <main>
+      <nav class="view-nav" aria-label="Main navigation">
+        <a href="#sprint" id="sprintTab">Explore plans</a>
+        <a href="#playbook" id="playbookTab">My shortlist <span class="nav-count" id="playbookBadge">0</span></a>
+      </nav>
+      <div id="gamePage">
+      <section class="intro" aria-labelledby="page-title">
+        <div>
+          <div class="eyebrow"><span class="live-dot" aria-hidden="true"></span> YOUR CAMPUS COVER CHECK</div>
+          <h1 id="page-title">Car insurance, minus the headache.</h1>
+        </div>
+        <div class="intro-note">Compare sample plans. Pick what matters. Get street-smart.</div>
+      </section>
+
+      <section class="sprint-strip" aria-label="Plan explorer progress">
+        <div class="round-label">PLANS TO EXPLORE<strong id="roundLabel">Round 01</strong></div>
+        <div class="progress" id="progress" aria-label="Plans explored"></div>
+        <div class="best-score">LOWEST / MONTH<strong id="bestPrice">--</strong></div>
+      </section>
+
+      <article class="policy-card" aria-live="polite" aria-atomic="true">
+        <section class="policy-info" id="policyInfo">
+          <div class="carrier-row">
+            <div class="carrier"><span class="carrier-symbol" id="carrierSymbol">A</span><span id="carrierName">Acer</span></div>
+            <span class="demo-tag">Fictional sample plan</span>
+          </div>
+          <div class="price-row"><span class="price" id="price">$128</span><span class="per-month">/ month</span></div>
+          <div class="annual" id="annual">Illustrative estimate · not a real quote</div>
+          <div class="divider"></div>
+          <h2 class="coverage-title">The coverage basics</h2>
+          <div class="coverage-grid">
+            <div class="coverage-item"><span>Liability</span><strong id="liability">$50k / $100k / $50k</strong></div>
+            <div class="coverage-item"><span>Collision</span><strong id="collision">Included</strong></div>
+            <div class="coverage-item"><span>Comprehensive</span><strong id="comprehensive">Included</strong></div>
+            <div class="coverage-item"><span>Roadside</span><strong id="roadside">Optional</strong></div>
+          </div>
+          <span class="deductible-chip" id="deductible">Up to 12 hours battery · 3.1 lb</span>
+        </section>
+
+        <section class="vehicle-panel" aria-label="Sample auto insurance plan">
+          <span class="vehicle-index" id="policyIndex">PLAN 01 / 06</span>
+          <div class="vehicle-copy">
+            <span class="location" id="location">STUDENT PICK</span>
+            <h2 class="vehicle-name" id="vehicle">The Campus Commuter</h2>
+            <div class="vehicle-detail" id="driver">Balanced protection for the drive to class and back</div>
+          </div>
+        </section>
+      </article>
+
+      <section class="challenge-panel" aria-labelledby="challengeTitle">
+        <div class="challenge-top">
+          <span class="challenge-kicker" id="challengeTitle">Curbside smarts · quick quiz</span>
+          <span class="challenge-score">SCORE <strong id="challengeScore">0 / 6</strong></span>
+        </div>
+        <p class="challenge-scenario" id="challengeScenario"></p>
+        <p class="challenge-question" id="challengeQuestion">What type of coverage could help here?</p>
+        <div class="answer-options" id="answerOptions" role="group" aria-label="Choose a type of auto insurance coverage"></div>
+        <p class="challenge-feedback" id="challengeFeedback" aria-live="polite">Choose an answer to see why it fits.</p>
+      </section>
+
+      <div class="action-row">
+        <button class="next-button" id="nextButton" type="button"><span id="buttonLabel">Show me another plan</span><span class="arrow" aria-hidden="true">-&gt;</span></button>
+        <button class="save-button" id="saveButton" type="button" aria-pressed="false"><span class="save-icon" aria-hidden="true">+</span><span id="saveLabel">Save plan</span></button>
+      </div>
+      <div class="below"><span id="sprintMessage"><strong>Ready?</strong> Explore coverage choices made for student life.</span><span>FICTIONAL PLANS · SAMPLE ESTIMATES</span></div>
+      <p class="notice">These fictional examples are for learning only, not insurance offers or quotes. Actual coverage and rates vary by insurer, state, driver, vehicle, and other factors. Check your state rules and compare real quotes before buying.</p>
+      </div>
+
+      <section id="playbookPage" hidden aria-labelledby="playbookTitle">
+        <header class="playbook-head">
+          <div>
+            <div class="eyebrow"><span class="live-dot" aria-hidden="true"></span> YOUR STUDENT DRIVER FIELD GUIDE</div>
+            <h1 id="playbookTitle">Know what you’re paying for.</h1>
+          </div>
+          <p>Keep useful plans close and get the insurance basics in plain language.</p>
+        </header>
+        <div class="playbook-grid">
+          <section aria-labelledby="savedOffersTitle">
+            <div class="section-heading"><h2 id="savedOffersTitle">Saved plans</h2><span id="savedSummary">0 plans</span></div>
+            <div class="saved-offers" id="savedOffers" aria-live="polite"></div>
+          </section>
+          <section aria-labelledby="coverageGuideTitle">
+            <div class="section-heading"><h2 id="coverageGuideTitle">Insurance, decoded</h2><span>QUICK REFERENCE</span></div>
+            <div class="coverage-guide">
+              <article class="guide-item"><h3>Liability: the must-know</h3><p>Often required by state law, liability can help pay for injuries or property damage you cause to others. A $50k / $100k / $50k limit usually means per-person injuries / injuries per crash / property damage. It usually does not repair your own car.</p></article>
+              <article class="guide-item"><h3>Collision: your car, after a crash</h3><p>Collision coverage can help repair or replace your car after a covered crash, even if you caused it. You pay your deductible first.</p></article>
+              <article class="guide-item"><h3>Comprehensive: the unexpected stuff</h3><p>This can cover certain non-crash losses, such as theft, hail, or a fallen branch. Check the policy for exclusions and deductible.</p></article>
+              <article class="guide-item"><h3>Deductible: your share</h3><p>A higher deductible can lower a premium, but means more out of pocket for a covered repair. Pick an amount you could actually manage.</p></article>
+              <article class="guide-item"><h3>Roadside help</h3><p>Towing, jump-starts, or lockout help may be available as an add-on or through another service. Compare what is included before paying twice.</p></article>
+              <article class="guide-item"><h3>Student discounts</h3><p>Ask insurers about good-student, driver-training, low-mileage, or bundling discounts. Eligibility and savings vary, so compare the final price.</p></article>
+              <article class="guide-item"><h3>Borrowing a family car?</h3><p>Insurance rules depend on who owns the car, where you live, and how often you drive it. Ask the policyholder and insurer before relying on coverage.</p></article>
+              <article class="guide-item"><h3>Before you hit “buy”</h3><p>Compare the same liability limits, deductibles, drivers, and vehicle on every quote. Read the policy and confirm the details directly with the insurer.</p></article>
+            </div>
+            <p class="guide-note">Coverage rules and terminology can vary by state and insurer. This guide is general education, not legal or insurance advice.</p>
+          </section>
+        </div>
+        <p class="playbook-notice">Sample plans and prices are fictional. Use them to learn what to compare, then get real quotes from licensed insurers.</p>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const plans = [
+      { carrier: 'Maple Mutual', symbol: 'M', price: 94, liability: '$50k / $100k / $50k', collision: 'Not included', comprehensive: 'Not included', roadside: 'Not included', deductible: 'Liability-only example · lowest monthly sample', city: 'LOWER COST', vehicle: 'The Bare-Bones Commuter', driver: 'A liability-only example for comparing required coverage' },
+      { carrier: 'Juniper Auto', symbol: 'J', price: 138, liability: '$100k / $300k / $100k', collision: 'Included', comprehensive: 'Included', roadside: 'Optional', deductible: '$1,000 deductible · good-student discount may apply', city: 'BALANCED PICK', vehicle: 'The Campus Commuter', driver: 'A broader example for regular drives to class and work' },
+      { carrier: 'Orbit Mutual', symbol: 'O', price: 172, liability: '$100k / $300k / $100k', collision: 'Included', comprehensive: 'Included', roadside: 'Included', deductible: '$500 deductible · roadside assistance included', city: 'EXTRA BACKUP', vehicle: 'The Late-Night Return', driver: 'Broader coverage with a roadside-help example' },
+      { carrier: 'Harbor Auto', symbol: 'H', price: 119, liability: '$50k / $100k / $50k', collision: 'Included', comprehensive: 'Included', roadside: 'Not included', deductible: '$1,500 deductible · compare repair costs first', city: 'HIGHER DEDUCTIBLE', vehicle: 'The Budget Balancer', driver: 'Lower sample premium with more out-of-pocket risk' },
+      { carrier: 'Daytrip Mutual', symbol: 'D', price: 156, liability: '$100k / $300k / $100k', collision: 'Included', comprehensive: 'Included', roadside: 'Optional', deductible: '$500 deductible · low-mileage discount may apply', city: 'LOW-MILEAGE', vehicle: 'The Weekend Driver', driver: 'An example for comparing lower-mileage discounts' },
+      { carrier: 'Northline Auto', symbol: 'N', price: 147, liability: '$100k / $300k / $100k', collision: 'Included', comprehensive: 'Included', roadside: 'Optional', deductible: '$750 deductible · driver-training discount may apply', city: 'STUDENT SAVER', vehicle: 'The Good-Student Plan', driver: 'Ask whether grades or driver training can change your rate' }
+    ];
+
+    const challenges = [
+      { scenario: 'You accidentally bump a parked car and damage its bumper. Which coverage may help pay for the other driver’s repair if you are responsible?', answer: 'Liability', options: ['Liability', 'Collision', 'Roadside'], explanation: 'Auto liability may cover another person’s injury or property damage when you are legally responsible, up to your policy limits.' },
+      { scenario: 'You slide into a campus light pole. Which coverage may help repair your own car after a covered crash?', answer: 'Collision', options: ['Collision', 'Liability', 'Roadside'], explanation: 'Collision can help with covered damage to your car after a crash, minus your deductible.' },
+      { scenario: 'A hailstorm dents your car while it is parked. Which coverage may help with this non-crash damage?', answer: 'Comprehensive', options: ['Comprehensive', 'Collision', 'Liability'], explanation: 'Comprehensive may cover certain non-collision losses such as hail, subject to your policy and deductible.' },
+      { scenario: 'Your battery dies before a late class. Which add-on may help arrange a jump-start?', answer: 'Roadside', options: ['Roadside', 'Collision', 'Liability'], explanation: 'Roadside assistance may help with services like a jump-start or tow. Check limits and whether you already have it elsewhere.' },
+      { scenario: 'Your car is stolen from the dorm lot. Which coverage may help with a covered theft loss?', answer: 'Comprehensive', options: ['Comprehensive', 'Collision', 'Roadside'], explanation: 'Comprehensive may cover vehicle theft, subject to the policy terms, vehicle value, and deductible.' },
+      { scenario: 'You scrape a concrete post while backing into a tight campus parking spot. Which coverage may help repair your car?', answer: 'Collision', options: ['Collision', 'Comprehensive', 'Liability'], explanation: 'Collision may cover damage to your own car from hitting an object, minus your deductible.' }
+    ];
+
+    const sprintLength = 6;
+    let deck = [];
+    let challengeDeck = [];
+    let challengeIndex = 0;
+    let currentChallenge = null;
+    let correctAnswers = 0;
+    let round = 1;
+    let revealed = 0;
+    let currentPolicy = 0;
+    let bestPrice = Infinity;
+    function loadSaved() {
+      try {
+        const stored = JSON.parse(localStorage.getItem('campus-cover-saved') || '[]');
+        return new Set(stored.filter(index => Number.isInteger(index) && plans[index]));
+      } catch {
+        return new Set();
+      }
+    }
+
+    let saved = loadSaved();
+
+    const progress = document.getElementById('progress');
+    const savedCount = document.getElementById('savedCount');
+    const saveButton = document.getElementById('saveButton');
+    const savedOffers = document.getElementById('savedOffers');
+
+    function updateSavedCount() {
+      savedCount.textContent = saved.size;
+      document.getElementById('playbookBadge').textContent = saved.size;
+      document.getElementById('savedSummary').textContent = `${saved.size} ${saved.size === 1 ? 'plan' : 'plans'}`;
+    }
+
+    function renderPlaybook() {
+      savedOffers.replaceChildren();
+      if (saved.size === 0) {
+        const emptyState = document.createElement('div');
+        emptyState.className = 'empty-state';
+        emptyState.textContent = 'Your shortlist is empty. Save a sample plan from the explorer to compare it here.';
+        savedOffers.append(emptyState);
+        return;
+      }
+
+      for (const index of saved) {
+        const plan = plans[index];
+        const offer = document.createElement('article');
+        offer.className = 'saved-offer';
+
+        const details = document.createElement('div');
+        const identity = document.createElement('div');
+        identity.className = 'saved-offer-top';
+        const symbol = document.createElement('span');
+        symbol.className = 'carrier-symbol';
+        symbol.textContent = plan.symbol;
+        const titleWrap = document.createElement('div');
+        const title = document.createElement('div');
+        title.className = 'saved-offer-title';
+        title.textContent = `${plan.carrier} ${plan.vehicle}`;
+        const vehicle = document.createElement('div');
+        vehicle.className = 'saved-offer-vehicle';
+        vehicle.textContent = `${plan.city} · ${plan.driver}`;
+        titleWrap.append(title, vehicle);
+        identity.append(symbol, titleWrap);
+        details.append(identity);
+
+        const price = document.createElement('div');
+        price.className = 'saved-offer-price';
+        price.textContent = `$${plan.price.toLocaleString('en-US')}`;
+        const perMonth = document.createElement('small');
+        perMonth.textContent = ' / month';
+        price.append(perMonth);
+
+        const snapshot = document.createElement('div');
+        snapshot.className = 'saved-offer-details';
+        for (const detail of [`Liability ${plan.liability}`, `Collision ${plan.collision}`, `Comprehensive ${plan.comprehensive}`, `Roadside ${plan.roadside}`, plan.deductible]) {
+          const item = document.createElement('span');
+          item.textContent = detail;
+          snapshot.append(item);
+        }
+
+        const remove = document.createElement('button');
+        remove.className = 'remove-offer';
+        remove.type = 'button';
+        remove.dataset.removePolicy = index;
+        remove.setAttribute('aria-label', `Remove ${plan.carrier} ${plan.vehicle}`);
+        remove.textContent = 'Remove';
+        offer.append(details, price, snapshot, remove);
+        savedOffers.append(offer);
+      }
+    }
+
+    function showPage() {
+      const playbookIsActive = window.location.hash === '#playbook';
+      document.getElementById('gamePage').hidden = playbookIsActive;
+      document.getElementById('playbookPage').hidden = !playbookIsActive;
+      if (playbookIsActive) {
+        document.getElementById('playbookTab').setAttribute('aria-current', 'page');
+        document.getElementById('sprintTab').removeAttribute('aria-current');
+      } else {
+        document.getElementById('sprintTab').setAttribute('aria-current', 'page');
+        document.getElementById('playbookTab').removeAttribute('aria-current');
+      }
+    }
+
+    function shuffle(items) {
+      const result = [...items];
+      for (let index = result.length - 1; index > 0; index--) {
+        const swapIndex = Math.floor(Math.random() * (index + 1));
+        [result[index], result[swapIndex]] = [result[swapIndex], result[index]];
+      }
+      return result;
+    }
+
+    function startRound() {
+      deck = shuffle(plans);
+      challengeDeck = shuffle(challenges);
+      challengeIndex = 0;
+      correctAnswers = 0;
+      document.getElementById('challengeScore').textContent = `0 / ${sprintLength}`;
+      revealed = 0;
+      bestPrice = Infinity;
+      round += 1;
+      document.getElementById('roundTop').textContent = String(round).padStart(2, '0');
+      document.getElementById('roundLabel').textContent = `Round ${String(round).padStart(2, '0')}`;
+      document.getElementById('bestPrice').textContent = '--';
+      document.getElementById('sprintMessage').innerHTML = '<strong>New round.</strong> Find the best fit for your needs.';
+      updateProgress();
+    }
+
+    function updateProgress() {
+      progress.replaceChildren(...Array.from({ length: sprintLength }, (_, index) => {
+        const segment = document.createElement('span');
+        if (index < revealed) segment.classList.add('filled');
+        return segment;
+      }));
+      progress.setAttribute('aria-label', `${revealed} of ${sprintLength} plans explored`);
+    }
+
+    function showPolicy(laptop, index) {
+      currentPolicy = index;
+      const values = {
+        carrierSymbol: laptop.symbol,
+        carrierName: laptop.carrier,
+        price: `$${laptop.price.toLocaleString('en-US')}`,
+        annual: 'Illustrative estimate · not a real quote',
+        liability: laptop.liability,
+        collision: laptop.collision,
+        comprehensive: laptop.comprehensive,
+        roadside: laptop.roadside,
+        deductible: laptop.deductible,
+        location: laptop.city,
+        vehicle: laptop.vehicle,
+        driver: laptop.driver,
+        policyIndex: `PLAN ${String(revealed).padStart(2, '0')} / ${sprintLength}`
+      };
+      for (const [id, value] of Object.entries(values)) document.getElementById(id).textContent = value;
+      document.getElementById('policyInfo').classList.remove('flash');
+      void document.getElementById('policyInfo').offsetWidth;
+      document.getElementById('policyInfo').classList.add('flash');
+      saveButton.setAttribute('aria-pressed', String(saved.has(index)));
+      document.getElementById('saveLabel').textContent = saved.has(index) ? 'Saved' : 'Save plan';
+      document.getElementById('saveButton').querySelector('.save-icon').textContent = saved.has(index) ? '✓' : '+';
+    }
+
+    function dealChallenge() {
+      if (challengeIndex === challengeDeck.length) {
+        challengeDeck = shuffle(challenges);
+        challengeIndex = 0;
+      }
+      currentChallenge = challengeDeck[challengeIndex++];
+      document.getElementById('challengeScenario').textContent = currentChallenge.scenario;
+      const answerOptions = document.getElementById('answerOptions');
+      answerOptions.replaceChildren(...currentChallenge.options.map(answer => {
+        const button = document.createElement('button');
+        button.className = 'answer-option';
+        button.type = 'button';
+        button.dataset.answer = answer;
+        button.textContent = answer;
+        return button;
+      }));
+      const feedback = document.getElementById('challengeFeedback');
+      feedback.textContent = 'Choose an answer to see why it fits.';
+      delete feedback.dataset.result;
+      document.querySelectorAll('.answer-option').forEach(option => {
+        option.disabled = false;
+        option.classList.remove('correct', 'incorrect');
+        option.removeAttribute('aria-pressed');
+      });
+    }
+
+    function answerChallenge(selectedOption) {
+      if (!currentChallenge || selectedOption.disabled) return;
+      const isCorrect = selectedOption.dataset.answer === currentChallenge.answer;
+      const options = document.querySelectorAll('.answer-option');
+      options.forEach(option => {
+        option.disabled = true;
+        if (option.dataset.answer === currentChallenge.answer) option.classList.add('correct');
+      });
+      if (!isCorrect) selectedOption.classList.add('incorrect');
+      selectedOption.setAttribute('aria-pressed', 'true');
+      if (isCorrect) correctAnswers += 1;
+      document.getElementById('challengeScore').textContent = `${correctAnswers} / ${sprintLength}`;
+      const feedback = document.getElementById('challengeFeedback');
+      feedback.dataset.result = isCorrect ? 'correct' : 'incorrect';
+      feedback.textContent = isCorrect
+        ? `That's it. ${currentChallenge.explanation}`
+        : `Not quite. ${currentChallenge.answer} is the usual fit. ${currentChallenge.explanation}`;
+    }
+
+    function nextPolicy() {
+      if (revealed === sprintLength) startRound();
+      const laptop = deck[revealed];
+      revealed += 1;
+      showPolicy(laptop, plans.indexOf(laptop));
+      dealChallenge();
+      bestPrice = Math.min(bestPrice, laptop.price);
+      document.getElementById('bestPrice').textContent = `$${bestPrice.toLocaleString('en-US')}`;
+      document.getElementById('sprintMessage').innerHTML = revealed === sprintLength
+        ? `<strong>Round complete.</strong> Lowest sample estimate: $${bestPrice.toLocaleString('en-US')} / month. Keep browsing or run it back.`
+        : `<strong>${sprintLength - revealed} ${sprintLength - revealed === 1 ? 'plan' : 'plans'} left.</strong> Lowest sample estimate: $${bestPrice.toLocaleString('en-US')} / month.`;
+      updateProgress();
+    }
+
+    saveButton.addEventListener('click', () => {
+      if (saved.has(currentPolicy)) saved.delete(currentPolicy);
+      else saved.add(currentPolicy);
+      try {
+        localStorage.setItem('campus-cover-saved', JSON.stringify([...saved]));
+      } catch {
+        // Keep the current session's saved offers even when browser storage is unavailable.
+      }
+      updateSavedCount();
+      renderPlaybook();
+      saveButton.setAttribute('aria-pressed', String(saved.has(currentPolicy)));
+      document.getElementById('saveLabel').textContent = saved.has(currentPolicy) ? 'Saved' : 'Save offer';
+      saveButton.querySelector('.save-icon').textContent = saved.has(currentPolicy) ? '✓' : '+';
+    });
+    document.getElementById('answerOptions').addEventListener('click', event => {
+      const selectedOption = event.target.closest('.answer-option');
+      if (selectedOption) answerChallenge(selectedOption);
+    });
+    savedOffers.addEventListener('click', event => {
+      const removeButton = event.target.closest('[data-remove-policy]');
+      if (!removeButton) return;
+      const index = Number(removeButton.dataset.removePolicy);
+      saved.delete(index);
+      try {
+        localStorage.setItem('campus-cover-saved', JSON.stringify([...saved]));
+      } catch {
+        // Keep the current session's saved offers even when browser storage is unavailable.
+      }
+      updateSavedCount();
+      renderPlaybook();
+      if (currentPolicy === index) {
+        saveButton.setAttribute('aria-pressed', 'false');
+        document.getElementById('saveLabel').textContent = 'Save plan';
+        saveButton.querySelector('.save-icon').textContent = '+';
+      }
+    });
+    document.getElementById('nextButton').addEventListener('click', nextPolicy);
+    window.addEventListener('hashchange', showPage);
+
+    deck = shuffle(plans);
+    challengeDeck = shuffle(challenges);
+    revealed = 1;
+    bestPrice = deck[0].price;
+    currentPolicy = plans.indexOf(deck[0]);
+    showPolicy(deck[0], currentPolicy);
+    dealChallenge();
+    document.getElementById('bestPrice').textContent = `$${bestPrice.toLocaleString('en-US')}`;
+    document.getElementById('sprintMessage').innerHTML = `<strong>${sprintLength - revealed} plans left.</strong> Lowest sample estimate: $${bestPrice.toLocaleString('en-US')} / month.`;
+    updateProgress();
+    updateSavedCount();
+    renderPlaybook();
+    showPage();
+  </script>
+</body>
+</html>

@@ -1,0 +1,685 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111917">
+  <title>Insurance 101 | Campus Dash</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+    :root {
+      color-scheme: dark;
+      --bg: #111917;
+      --surface: #1b2623;
+      --surface-raised: #232f2b;
+      --line: #35423c;
+      --ink: #edf3e8;
+      --muted: #a5b2a8;
+      --lime: #d3f36b;
+      --coral: #ff8b72;
+      --sky: #83c8da;
+      --gold: #f3ca72;
+      --sans: 'DM Sans', sans-serif;
+      --display: 'Barlow Condensed', Impact, sans-serif;
+      --mono: 'DM Mono', monospace;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background-color: var(--bg);
+      background-image: radial-gradient(#ffffff0b 0.7px, transparent 0.7px);
+      background-size: 20px 20px;
+      font-family: var(--sans);
+    }
+    button, a { font: inherit; }
+    a { color: inherit; }
+    a:focus-visible, button:focus-visible { outline: 3px solid var(--lime); outline-offset: 3px; }
+
+    .topbar { min-height: 68px; display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 10px clamp(16px, 4vw, 54px); border-bottom: 1px solid var(--line); background: #111917f2; }
+    .brand { display: flex; align-items: center; gap: 11px; text-decoration: none; }
+    .brand-mark { width: 37px; height: 37px; display: grid; place-items: center; border-radius: 10px; color: #192b2b; background: var(--lime); font: 800 23px var(--display); transform: rotate(-5deg); }
+    .brand-name { font: 700 19px var(--display); letter-spacing: .04em; }
+    .brand-note { margin-top: 1px; color: var(--muted); font: 9px var(--mono); letter-spacing: .08em; }
+    .top-nav { display: flex; align-items: center; gap: 8px; }
+    .top-nav a { min-height: 37px; display: inline-flex; align-items: center; gap: 7px; padding: 0 12px; border: 1px solid transparent; border-radius: 5px; color: var(--muted); text-decoration: none; font-size: 11px; font-weight: 600; }
+    .top-nav a:hover { color: var(--ink); background: var(--surface); }
+    .top-nav a[aria-current="page"] { border-color: #566448; color: var(--lime); background: #253023; }
+
+    main { width: min(1240px, 100%); margin: 0 auto; padding: 37px clamp(17px, 4vw, 42px) 52px; }
+    .eyebrow { margin-bottom: 9px; color: var(--lime); font: 10px var(--mono); letter-spacing: .14em; text-transform: uppercase; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { max-width: 700px; margin-bottom: 10px; font: 700 clamp(38px, 6vw, 66px)/.91 var(--display); letter-spacing: .01em; }
+    .lede { max-width: 640px; margin-bottom: 28px; color: var(--muted); font-size: 14px; line-height: 1.7; }
+
+    .overview { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(290px, .75fr); gap: 38px; align-items: stretch; padding: 23px 0 29px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .situation h2 { margin-bottom: 6px; font: 600 24px var(--display); }
+    .section-copy { margin-bottom: 14px; color: var(--muted); font-size: 11px; line-height: 1.6; }
+    .situation-tabs { display: flex; flex-wrap: wrap; gap: 7px; margin: 16px 0 13px; }
+    .situation-tab { min-height: 38px; padding: 0 12px; border: 1px solid var(--line); border-radius: 5px; color: var(--muted); background: var(--surface); cursor: pointer; font-size: 11px; font-weight: 600; }
+    .situation-tab:hover { border-color: #71816f; color: var(--ink); }
+    .situation-tab[aria-pressed="true"] { border-color: var(--lime); color: var(--lime); background: #293626; }
+    .situation-result { min-height: 107px; padding: 15px 16px; border-left: 3px solid var(--coral); background: var(--surface); }
+    .situation-result strong { display: block; margin-bottom: 5px; color: var(--coral); font: 600 18px var(--display); }
+    .situation-result p { margin: 0; color: #d1dbd1; font-size: 12px; line-height: 1.6; }
+    .quote-prep { align-self: stretch; padding: 16px 18px; border-left: 1px solid var(--line); background: #17211e; }
+    .quote-prep h2 { margin: 0 0 5px; font: 600 23px var(--display); }
+    .quote-prep > p { margin: 0 0 9px; color: var(--muted); font-size: 10px; line-height: 1.55; }
+    .prep-list { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+    .prep-list li { display: grid; grid-template-columns: 24px 1fr; align-items: start; gap: 8px; padding: 8px 0; border-top: 1px solid var(--line); color: #dce5da; font-size: 10px; line-height: 1.5; }
+    .prep-list li span { color: var(--lime); font: 10px var(--mono); }
+
+    .coverage-section { padding: 31px 0 30px; border-bottom: 1px solid var(--line); }
+    .section-head { display: flex; justify-content: space-between; align-items: end; gap: 18px; margin-bottom: 15px; }
+    .section-head h2 { margin: 0; font: 600 29px var(--display); }
+    .section-head p { max-width: 370px; margin: 0 0 2px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .coverage-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    .coverage-item { min-height: 171px; padding: 16px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+    .coverage-item:nth-child(2) { border-top: 2px solid var(--coral); }
+    .coverage-item:nth-child(3) { border-top: 2px solid var(--sky); }
+    .coverage-item:nth-child(1) { border-top: 2px solid var(--lime); }
+    .coverage-number { color: var(--muted); font: 10px var(--mono); }
+    .coverage-item h3 { margin: 13px 0 6px; font: 600 23px var(--display); }
+    .coverage-item p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.6; }
+    .coverage-item strong { color: var(--ink); font-weight: 600; }
+
+    .what-cover-section, .risk-check-section { padding: 30px 0; border-bottom: 1px solid var(--line); }
+    .scenario-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+    .cover-scenario { min-height: 104px; display: flex; flex-direction: column; align-items: start; gap: 8px; padding: 13px; border: 1px solid var(--line); border-radius: 5px; color: var(--ink); background: var(--surface); cursor: pointer; text-align: left; }
+    .cover-scenario:hover { border-color: #82926d; background: var(--surface-raised); }
+    .cover-scenario[aria-pressed="true"] { border-color: var(--lime); box-shadow: inset 0 2px var(--lime); }
+    .scenario-icon { color: var(--lime); font: 600 18px var(--display); }
+    .scenario-label { font-size: 10px; font-weight: 600; line-height: 1.4; }
+    .scenario-result { min-height: 79px; margin-top: 9px; padding: 13px 15px; border-left: 3px solid var(--sky); background: var(--surface); }
+    .scenario-result strong { display: block; margin-bottom: 4px; color: var(--sky); font: 600 18px var(--display); }
+    .scenario-result p { margin: 0; color: #d3ded5; font-size: 11px; line-height: 1.6; }
+    .run-context { display: block; margin-bottom: 5px; color: var(--lime); font: 9px var(--mono); letter-spacing: .07em; }
+    .risk-check-section { display: grid; grid-template-columns: minmax(250px, .78fr) minmax(0, 1.22fr); gap: 30px; align-items: start; }
+    .risk-check-intro h2 { margin: 0 0 7px; font: 600 29px var(--display); }
+    .risk-check-intro p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.65; }
+    .risk-check-form { display: grid; gap: 0; }
+    .risk-question { display: grid; grid-template-columns: 25px 1fr; gap: 8px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+    .risk-question-number { color: var(--lime); font: 10px var(--mono); }
+    .risk-question fieldset { min-width: 0; display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 0; padding: 0; border: 0; }
+    .risk-question legend { float: left; max-width: 72%; color: #e1e9df; font-size: 10px; line-height: 1.5; }
+    .risk-answers { display: flex; gap: 8px; }
+    .risk-answers label { display: flex; align-items: center; gap: 3px; color: var(--muted); font-size: 9px; white-space: nowrap; }
+    .risk-answers input { accent-color: var(--lime); }
+    .risk-check-submit { justify-self: start; min-height: 38px; margin-top: 11px; padding: 0 13px; border: 1px solid var(--lime); border-radius: 4px; color: #17221d; background: var(--lime); cursor: pointer; font-size: 10px; font-weight: 700; }
+    .risk-check-submit:hover { background: #e7ffae; }
+    .risk-check-result { margin-top: 11px; padding: 12px 14px; border-left: 3px solid var(--lime); background: var(--surface); }
+    .risk-check-result[data-level="moderate"] { border-color: var(--gold); }
+    .risk-check-result[data-level="high"] { border-color: var(--coral); }
+    .risk-check-result h3 { margin: 0 0 5px; font: 600 20px var(--display); }
+    .risk-check-result p, .risk-check-result li { color: #d2ddd3; font-size: 10px; line-height: 1.5; }
+    .risk-check-result ul { display: grid; gap: 3px; margin: 5px 0 0; padding-left: 17px; }
+
+    .reference-section { display: grid; grid-template-columns: minmax(0, 1.72fr) minmax(225px, .78fr); gap: 15px; padding: 29px 0; border-bottom: 1px solid var(--line); }
+    .quick-panel { align-self: start; padding: 17px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+    .quick-panel h2, .policy-heading h2 { margin: 0; font: 600 25px var(--display); }
+    .quick-panel > p, .policy-heading p { margin: 5px 0 13px; color: var(--muted); font-size: 10px; line-height: 1.55; }
+    .term-list { display: grid; gap: 0; margin: 0; }
+    .term-list div { display: grid; grid-template-columns: 86px 1fr; gap: 9px; padding: 9px 0; border-top: 1px solid var(--line); }
+    .term-list dt { color: var(--lime); font: 11px var(--mono); }
+    .term-list dd { margin: 0; color: #d5ded5; font-size: 10px; line-height: 1.5; }
+    .policy-heading { display: flex; justify-content: space-between; align-items: end; gap: 13px; margin-bottom: 12px; }
+    .policy-heading p { max-width: 300px; margin: 0; text-align: right; }
+    .policy-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+    .policy-example { padding: 15px; border: 1px solid var(--line); border-top: 2px solid var(--coral); border-radius: 6px; background: var(--surface); }
+    .policy-example:nth-child(2) { border-top-color: var(--sky); }
+    .policy-tag { color: var(--coral); font: 9px var(--mono); letter-spacing: .08em; }
+    .policy-example:nth-child(2) .policy-tag { color: var(--sky); }
+    .policy-example h3 { margin: 5px 0 4px; font: 600 22px var(--display); }
+    .policy-example > p { margin: 0 0 11px; color: var(--muted); font-size: 10px; line-height: 1.5; }
+    .policy-price { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 11px 0; padding: 9px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .policy-price-label { color: var(--muted); font: 8px var(--mono); letter-spacing: .06em; text-transform: uppercase; }
+    .policy-price strong { display: block; margin-top: 2px; color: var(--coral); font: 700 27px var(--display); white-space: nowrap; }
+    .policy-example:nth-child(2) .policy-price strong { color: var(--sky); }
+    .policy-price strong small { color: var(--muted); font: 500 10px var(--sans); }
+    .policy-term { color: var(--muted); font-size: 9px; text-align: right; white-space: nowrap; }
+    .policy-details { display: grid; gap: 0; margin: 0; }
+    .policy-details div { display: flex; justify-content: space-between; gap: 9px; padding: 7px 0; border-top: 1px solid var(--line); font-size: 10px; }
+    .policy-details dt { color: var(--muted); }
+    .policy-details dd { margin: 0; color: var(--ink); font-weight: 600; text-align: right; }
+    .policy-example .policy-tradeoff { margin: 10px 0 0; padding-top: 9px; border-top: 1px solid var(--line); color: #d6dfd6; }
+    .trend-section { margin-top: 18px; padding-top: 15px; border-top: 1px solid var(--line); }
+    .trend-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 10px; }
+    .trend-heading h3 { margin: 0; font: 600 22px var(--display); }
+    .trend-heading span { color: var(--muted); font: 8px var(--mono); letter-spacing: .07em; }
+    .trend-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+    .trend-chart { min-width: 0; margin: 0; padding: 11px; border: 1px solid var(--line); border-radius: 5px; background: #17211e; }
+    .trend-chart figcaption { display: flex; flex-direction: column; gap: 2px; margin-bottom: 6px; }
+    .trend-chart figcaption strong { font: 600 17px var(--display); }
+    .trend-chart figcaption span { color: var(--muted); font-size: 9px; }
+    .trend-chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+    .trend-gridline { stroke: #34413b; stroke-width: 1; stroke-dasharray: 3 4; }
+    .trend-axis-line { stroke: #718078; stroke-width: 1; }
+    .trend-line { fill: none; stroke: var(--lime); stroke-width: 3; stroke-linecap: round; }
+    .trend-chart:nth-child(2) .trend-line { stroke: var(--sky); }
+    .trend-point { fill: #17211e; stroke: var(--lime); stroke-width: 2.5; }
+    .trend-chart:nth-child(2) .trend-point { stroke: var(--sky); }
+    .trend-label { fill: #a5b2a8; font: 9px 'DM Sans', sans-serif; }
+    .trend-axis-labels { display: flex; justify-content: space-between; gap: 8px; margin: 0 1px 0 34px; color: var(--muted); font-size: 8px; }
+    .trend-note { margin: 9px 0 0; color: var(--muted); font-size: 9px; line-height: 1.55; }
+
+    .student-section { display: grid; grid-template-columns: minmax(0, 1fr) minmax(265px, .72fr); gap: 42px; padding: 31px 0; border-bottom: 1px solid var(--line); }
+    .student-section h2 { margin-bottom: 7px; font: 600 29px var(--display); }
+    .student-section .section-copy { max-width: 520px; margin-bottom: 15px; }
+    .checklist { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+    .checklist li { display: grid; grid-template-columns: 25px 1fr; gap: 8px; padding: 11px 0; border-bottom: 1px solid #2e3934; color: #dce5da; font-size: 11px; line-height: 1.55; }
+    .check { width: 20px; height: 20px; display: grid; place-items: center; border-radius: 50%; color: var(--ink); background: var(--lime); font-size: 11px; font-weight: 700; }
+    .deductible-note { align-self: start; padding: 19px; border: 1px solid #6e5b33; border-radius: 6px; background: #302a1d; }
+    .deductible-note .eyebrow { color: var(--gold); }
+    .deductible-note h3 { margin-bottom: 7px; font: 600 24px var(--display); }
+    .deductible-note p { margin-bottom: 0; color: #d7d1c1; font-size: 11px; line-height: 1.65; }
+
+    .support-section { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(300px, .95fr); gap: 15px; padding: 30px 0; border-bottom: 1px solid var(--line); }
+    .faq-panel, .chat-panel { padding: 18px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+    .support-heading { display: flex; justify-content: space-between; align-items: end; gap: 12px; margin-bottom: 12px; }
+    .support-heading h2, .chat-heading h2 { margin: 0; font: 600 27px var(--display); }
+    .support-heading .eyebrow, .chat-heading .eyebrow { margin-bottom: 4px; }
+    .faq-item { border-top: 1px solid var(--line); }
+    .faq-item summary { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 0; color: var(--ink); cursor: pointer; font-size: 11px; font-weight: 600; list-style: none; }
+    .faq-item summary::-webkit-details-marker { display: none; }
+    .faq-item summary::after { content: '+'; color: var(--lime); font: 16px var(--mono); }
+    .faq-item[open] summary::after { content: '-'; }
+    .faq-item p { margin: -3px 20px 12px 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
+    .chat-panel { display: flex; flex-direction: column; min-height: 100%; }
+    .chat-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .chat-badge { padding: 5px 7px; border: 1px solid #566448; border-radius: 4px; color: var(--lime); font: 8px var(--mono); white-space: nowrap; }
+    .chat-disclaimer { margin: 5px 0 12px; color: var(--muted); font-size: 10px; line-height: 1.5; }
+    .chat-log { min-height: 175px; max-height: 255px; display: flex; flex-direction: column; gap: 9px; overflow-y: auto; padding: 10px; border: 1px solid var(--line); border-radius: 5px; background: #131c19; }
+    .chat-message { width: fit-content; max-width: 94%; padding: 8px 10px; border-radius: 5px; }
+    .chat-message.bot { border: 1px solid #34443c; background: #1e2b26; }
+    .chat-message.user { align-self: end; color: #17221d; background: var(--lime); }
+    .chat-speaker { display: block; margin-bottom: 3px; color: var(--lime); font: 8px var(--mono); text-transform: uppercase; }
+    .chat-message.user .chat-speaker { color: #49603b; }
+    .chat-message p { margin: 0; font-size: 10px; line-height: 1.5; }
+    .chat-suggestions { display: flex; flex-wrap: wrap; gap: 5px; margin: 9px 0; }
+    .chat-suggestion { min-height: 28px; padding: 0 8px; border: 1px solid var(--line); border-radius: 4px; color: #dce5da; background: transparent; cursor: pointer; font-size: 9px; }
+    .chat-suggestion:hover { border-color: var(--lime); color: var(--lime); }
+    .chat-form { display: grid; grid-template-columns: 1fr auto; gap: 7px; margin-top: auto; }
+    .chat-input { width: 100%; min-width: 0; min-height: 39px; padding: 0 10px; border: 1px solid var(--line); border-radius: 4px; color: var(--ink); background: #131c19; font: 10px var(--sans); }
+    .chat-input::placeholder { color: #8a9a8f; }
+    .chat-send { min-height: 39px; padding: 0 12px; border: 0; border-radius: 4px; color: #17221d; background: var(--lime); cursor: pointer; font-size: 10px; font-weight: 700; }
+    .chat-send:hover { background: #e4ffa0; }
+    .chat-local-note { margin: 8px 0 0; color: #89988d; font-size: 9px; line-height: 1.45; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+    .bottom-note { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding-top: 20px; color: var(--muted); font-size: 10px; line-height: 1.6; }
+    .bottom-note p { max-width: 710px; margin: 0; }
+    .game-cta { min-height: 45px; display: inline-flex; justify-content: center; align-items: center; gap: 10px; padding: 0 16px; border: 1px solid var(--lime); border-radius: 5px; color: #19251d; background: var(--lime); text-decoration: none; font-size: 11px; font-weight: 700; white-space: nowrap; }
+    .game-cta:hover { border-color: #e7ffae; background: #e7ffae; }
+
+    @media (max-width: 760px) {
+      .topbar { min-height: 60px; padding-right: 15px; padding-left: 15px; }
+      .top-nav { gap: 3px; }
+      .top-nav a { min-height: 34px; padding: 0 8px; font-size: 10px; }
+      main { padding-top: 27px; }
+      .overview { grid-template-columns: 1fr; gap: 18px; }
+      .quote-prep { padding: 16px 0 0; border-top: 1px solid var(--line); border-left: 0; background: transparent; }
+      .scenario-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .risk-check-section { grid-template-columns: 1fr; gap: 17px; }
+      .reference-section { grid-template-columns: 1fr; }
+      .student-section { grid-template-columns: 1fr; gap: 22px; }
+      .support-section { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 520px) {
+      .brand-note { font-size: 8px; }
+      .top-nav a { padding: 0 6px; font-size: 9px; }
+      .coverage-grid { grid-template-columns: 1fr; }
+      .coverage-item { min-height: 0; }
+      .scenario-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .policy-pair { grid-template-columns: 1fr; }
+      .trend-grid { grid-template-columns: 1fr; }
+      .policy-heading { align-items: start; flex-direction: column; }
+      .policy-heading p { text-align: left; }
+      .section-head { align-items: start; flex-direction: column; gap: 6px; }
+      .section-head p { max-width: none; }
+      .bottom-note { align-items: start; flex-direction: column; gap: 13px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="campus-dash.html" aria-label="Campus Dash home">
+      <span class="brand-mark" aria-hidden="true">C</span>
+      <span><span class="brand-name">CAMPUS DASH</span><span class="brand-note">THE STUDENT DRIVING ARCADE</span></span>
+    </a>
+    <nav class="top-nav" aria-label="Main navigation">
+      <a href="campus-dash.html">Game <span aria-hidden="true">↗</span></a>
+      <a href="insurance-guide.html" aria-current="page">Insurance 101</a>
+    </nav>
+  </header>
+
+  <main>
+    <header>
+      <div class="eyebrow">THE STUDENT DRIVER FIELD GUIDE · 4 MIN READ</div>
+      <h1>Auto insurance,<br>without the mystery.</h1>
+      <p class="lede">Start with how you use a car. Then compare the same limits, drivers, and deductibles on every quote. You don’t need to learn the whole insurance dictionary first.</p>
+    </header>
+
+    <section class="overview" aria-label="Student insurance starter">
+      <div class="situation">
+        <div class="eyebrow">FIRST, YOUR CAR SITUATION</div>
+        <h2>Which sounds like you?</h2>
+        <p class="section-copy">Pick one for a few things to check before you compare plans.</p>
+        <div class="situation-tabs" role="group" aria-label="Choose your car situation">
+          <button class="situation-tab" type="button" data-situation="own" aria-pressed="true">My own car</button>
+          <button class="situation-tab" type="button" data-situation="family" aria-pressed="false">Family car</button>
+          <button class="situation-tab" type="button" data-situation="finance" aria-pressed="false">Financed or leased</button>
+        </div>
+        <div class="situation-result" id="situationResult" aria-live="polite">
+          <strong id="situationTitle">Your car, your call</strong>
+          <p id="situationCopy">If the car is paid off, weigh the cost of collision and comprehensive against what you could afford to repair or replace yourself. State-required coverage still applies.</p>
+        </div>
+      </div>
+
+      <aside class="quote-prep" aria-labelledby="quotePrepTitle">
+        <div class="eyebrow">BEFORE YOU COMPARE</div>
+        <h2 id="quotePrepTitle">Have these handy.</h2>
+        <p>A few details make it easier to compare like for like.</p>
+        <ul class="prep-list">
+          <li><span>01</span><div><strong>Your car</strong><br>Year, make, model, and where it usually stays.</div></li>
+          <li><span>02</span><div><strong>Who drives</strong><br>List the people who regularly use the car.</div></li>
+          <li><span>03</span><div><strong>How you drive</strong><br>Approximate yearly miles and commute use.</div></li>
+        </ul>
+      </aside>
+
+    </section>
+
+    <section class="coverage-section" aria-labelledby="coverageTitle">
+      <div class="section-head">
+        <h2 id="coverageTitle">Three coverages to know</h2>
+        <p>What each one generally helps with. Exact coverage depends on the policy.</p>
+      </div>
+      <div class="coverage-grid">
+        <article class="coverage-item">
+          <span class="coverage-number">01 · OFTEN REQUIRED</span>
+          <h3>Liability</h3>
+          <p><strong>Other people and their property.</strong> Can help pay when you’re legally responsible for an injury or damage. It generally won’t fix your own car.</p>
+        </article>
+        <article class="coverage-item">
+          <span class="coverage-number">02 · CRASH DAMAGE</span>
+          <h3>Collision</h3>
+          <p><strong>Your car after a crash.</strong> Can help repair your car after hitting another car or an object. Your deductible usually comes first.</p>
+        </article>
+        <article class="coverage-item">
+          <span class="coverage-number">03 · NON-CRASH</span>
+          <h3>Comprehensive</h3>
+          <p><strong>Some unexpected losses.</strong> Can help with covered theft, hail, or a fallen branch. Check exclusions and your deductible.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="what-cover-section" aria-labelledby="whatCoverTitle">
+      <div class="section-head">
+        <h2 id="whatCoverTitle">What would cover this?</h2>
+        <p>Choose a student-life scenario for general coverage information.</p>
+      </div>
+      <div class="scenario-grid" role="group" aria-label="Choose an auto insurance scenario">
+        <button class="cover-scenario" type="button" data-cover-scenario="pole" aria-pressed="false"><span class="scenario-icon">01</span><span class="scenario-label">You back into a pole</span></button>
+        <button class="cover-scenario" type="button" data-cover-scenario="branch" aria-pressed="false"><span class="scenario-icon">02</span><span class="scenario-label">A branch falls on your parked car</span></button>
+        <button class="cover-scenario" type="button" data-cover-scenario="other-car" aria-pressed="false"><span class="scenario-icon">03</span><span class="scenario-label">You damage someone else’s vehicle</span></button>
+        <button class="cover-scenario" type="button" data-cover-scenario="fire" aria-pressed="false"><span class="scenario-icon">04</span><span class="scenario-label">A covered fire damages your vehicle</span></button>
+        <button class="cover-scenario" type="button" data-cover-scenario="theft" aria-pressed="false"><span class="scenario-icon">05</span><span class="scenario-label">Your vehicle is stolen</span></button>
+      </div>
+      <div class="scenario-result" id="coverScenarioResult" aria-live="polite">
+        <strong id="coverScenarioTitle">Pick a scenario</strong>
+        <span class="run-context" id="runContext" hidden></span>
+        <p id="coverScenarioCopy">See which coverage is generally associated with the situation, and what to check in the policy.</p>
+      </div>
+    </section>
+
+    <section class="reference-section" aria-label="Sample policy comparison and quick reference">
+      <div class="policy-area">
+        <div class="policy-heading">
+          <div><div class="eyebrow">SIDE-BY-SIDE EXAMPLES</div><h2>Two ways coverage can look.</h2></div>
+          <p>Completely fictional prices for comparison practice. Not market rates, quotes, or real offers.</p>
+        </div>
+        <div class="policy-pair">
+          <article class="policy-example">
+            <span class="policy-tag">EXAMPLE A · LIABILITY FOCUS</span>
+            <h3>Cover the basics</h3>
+            <p>Illustrates liability coverage without protection for damage to your own car.</p>
+            <div class="policy-price"><div><span class="policy-price-label">Sample premium</span><strong>$108 <small>/ month</small></strong></div><span class="policy-term">$648<br>6 months</span></div>
+            <dl class="policy-details">
+              <div><dt>Liability</dt><dd>$50k / $100k / $50k</dd></div>
+              <div><dt>Collision</dt><dd>Not included</dd></div>
+              <div><dt>Comprehensive</dt><dd>Not included</dd></div>
+              <div><dt>Own-car deductible</dt><dd>Not applicable</dd></div>
+            </dl>
+            <p class="policy-tradeoff">Trade-off: damage to your car may come out of your pocket.</p>
+          </article>
+          <article class="policy-example">
+            <span class="policy-tag">EXAMPLE B · BROADER COVERAGE</span>
+            <h3>Protect your car, too</h3>
+            <p>Illustrates liability plus collision and comprehensive coverage.</p>
+            <div class="policy-price"><div><span class="policy-price-label">Sample premium</span><strong>$176 <small>/ month</small></strong></div><span class="policy-term">$1,056<br>6 months</span></div>
+            <dl class="policy-details">
+              <div><dt>Liability</dt><dd>$100k / $300k / $100k</dd></div>
+              <div><dt>Collision</dt><dd>Included</dd></div>
+              <div><dt>Comprehensive</dt><dd>Included</dd></div>
+              <div><dt>Example deductible</dt><dd>$500</dd></div>
+            </dl>
+            <p class="policy-tradeoff">Trade-off: compare the added premium and deductible with your budget.</p>
+          </article>
+        </div>
+        <section class="trend-section" aria-labelledby="trendTitle">
+          <div class="trend-heading"><h3 id="trendTitle">What can move the premium?</h3><span>CONCEPTUAL TRENDS</span></div>
+          <div class="trend-grid">
+            <figure class="trend-chart">
+              <figcaption><strong>Coverage breadth</strong><span>More protection can cost more</span></figcaption>
+              <svg viewBox="0 0 320 112" role="img" aria-label="Conceptual upward trend: relative premium may rise as coverage becomes broader">
+                <line class="trend-gridline" x1="38" y1="20" x2="308" y2="20"></line>
+                <line class="trend-gridline" x1="38" y1="48" x2="308" y2="48"></line>
+                <line class="trend-gridline" x1="38" y1="76" x2="308" y2="76"></line>
+                <line class="trend-axis-line" x1="38" y1="12" x2="38" y2="88"></line>
+                <line class="trend-axis-line" x1="38" y1="88" x2="308" y2="88"></line>
+                <path class="trend-line" d="M48 78 C106 74 135 64 174 53 S247 34 298 22"></path>
+                <circle class="trend-point" cx="48" cy="78" r="4"></circle>
+                <circle class="trend-point" cx="298" cy="22" r="4"></circle>
+                <text class="trend-label" x="8" y="20">HIGH</text>
+                <text class="trend-label" x="11" y="87">LOW</text>
+              </svg>
+              <div class="trend-axis-labels"><span>Basic</span><span>Broader coverage</span></div>
+            </figure>
+            <figure class="trend-chart">
+              <figcaption><strong>Deductible amount</strong><span>A higher deductible may lower premium</span></figcaption>
+              <svg viewBox="0 0 320 112" role="img" aria-label="Conceptual downward trend: relative premium may fall as the deductible rises">
+                <line class="trend-gridline" x1="38" y1="20" x2="308" y2="20"></line>
+                <line class="trend-gridline" x1="38" y1="48" x2="308" y2="48"></line>
+                <line class="trend-gridline" x1="38" y1="76" x2="308" y2="76"></line>
+                <line class="trend-axis-line" x1="38" y1="12" x2="38" y2="88"></line>
+                <line class="trend-axis-line" x1="38" y1="88" x2="308" y2="88"></line>
+                <path class="trend-line" d="M48 24 C103 30 142 42 179 52 S248 70 298 78"></path>
+                <circle class="trend-point" cx="48" cy="24" r="4"></circle>
+                <circle class="trend-point" cx="298" cy="78" r="4"></circle>
+                <text class="trend-label" x="8" y="20">HIGH</text>
+                <text class="trend-label" x="11" y="87">LOW</text>
+              </svg>
+              <div class="trend-axis-labels"><span>Lower</span><span>Higher deductible</span></div>
+            </figure>
+          </div>
+          <p class="trend-note">Direction only, not a rate prediction: insurers price policies differently, and your state, vehicle, driving history, and discounts all matter. A higher deductible also means more out of pocket for a covered claim.</p>
+        </section>
+      </div>
+
+      <aside class="quick-panel" aria-labelledby="referenceTitle">
+        <div class="eyebrow">POCKET GLOSSARY</div>
+        <h2 id="referenceTitle">Terms, decoded.</h2>
+        <p>The basics you’ll see on almost every quote.</p>
+        <dl class="term-list">
+          <div><dt>Premium</dt><dd>What you pay to keep the policy active.</dd></div>
+          <div><dt>Deductible</dt><dd>Your share of a covered repair before insurance pays its share.</dd></div>
+          <div><dt>Limit</dt><dd>The most a coverage can pay for a covered loss.</dd></div>
+          <div><dt>Claim</dt><dd>A request for help with a loss under your policy.</dd></div>
+          <div><dt>Policy period</dt><dd>The dates your coverage is active.</dd></div>
+        </dl>
+      </aside>
+    </section>
+
+    <section class="student-section" aria-labelledby="studentTitle">
+      <div>
+        <div class="eyebrow">THE QUOTE CHECKLIST</div>
+
+        <h2 id="studentTitle">Keep your budget in the driver’s seat.</h2>
+        <p class="section-copy">A low monthly price only helps if the policy fits. Use this list when you talk to an insurer or compare quotes.</p>
+        <ul class="checklist">
+          <li><span class="check" aria-hidden="true">✓</span><span>Match the liability limits, car, listed drivers, and deductibles across every quote.</span></li>
+          <li><span class="check" aria-hidden="true">✓</span><span>Ask about good-student, driver-training, low-mileage, and bundling discounts. Eligibility and savings vary.</span></li>
+          <li><span class="check" aria-hidden="true">✓</span><span>If you take a family car to school or drive it regularly, ask the owner and insurer how the policy applies.</span></li>
+          <li><span class="check" aria-hidden="true">✓</span><span>Tell the insurer where the car is usually kept and who drives it. Accurate details matter.</span></li>
+        </ul>
+      </div>
+      <aside class="deductible-note">
+        <div class="eyebrow">A REAL-LIFE MONEY CHECK</div>
+        <h3>Could you cover the deductible?</h3>
+        <p>A higher deductible can mean a lower premium, but more out of pocket after a covered claim. Choose an amount you could actually access without missing rent, food, or tuition.</p>
+      </aside>
+    </section>
+
+    <section class="risk-check-section" id="riskcheck" aria-labelledby="riskCheckTitle">
+      <div class="risk-check-intro">
+        <div class="eyebrow">CAMPUS RISK CHECK</div>
+        <h2 id="riskCheckTitle">How risk-ready are you?</h2>
+        <p>Answer five quick yes/no questions to get practical prevention reminders. Your answers stay in this page and are not saved.</p>
+      </div>
+      <form class="risk-check-form" id="riskCheckForm">
+        <div class="risk-question"><span class="risk-question-number">01</span><fieldset><legend>Do you regularly lock your vehicle and take the keys?</legend><div class="risk-answers"><label><input type="radio" name="locks" value="yes" required> Yes</label><label><input type="radio" name="locks" value="no"> No</label></div></fieldset></div>
+        <div class="risk-question"><span class="risk-question-number">02</span><fieldset><legend>Do you leave valuables visible in the car?</legend><div class="risk-answers"><label><input type="radio" name="valuables" value="yes" required> Yes</label><label><input type="radio" name="valuables" value="no"> No</label></div></fieldset></div>
+        <div class="risk-question"><span class="risk-question-number">03</span><fieldset><legend>Do you know the deductible on your policy?</legend><div class="risk-answers"><label><input type="radio" name="deductible" value="yes" required> Yes</label><label><input type="radio" name="deductible" value="no"> No</label></div></fieldset></div>
+        <div class="risk-question"><span class="risk-question-number">04</span><fieldset><legend>Do you know which coverages your policy includes?</legend><div class="risk-answers"><label><input type="radio" name="coverage" value="yes" required> Yes</label><label><input type="radio" name="coverage" value="no"> No</label></div></fieldset></div>
+        <div class="risk-question"><span class="risk-question-number">05</span><fieldset><legend>Do you know what information to collect after a crash?</legend><div class="risk-answers"><label><input type="radio" name="crash" value="yes" required> Yes</label><label><input type="radio" name="crash" value="no"> No</label></div></fieldset></div>
+        <button class="risk-check-submit" type="submit">Show my readiness</button>
+        <div class="risk-check-result" id="riskCheckResult" aria-live="polite" hidden></div>
+      </form>
+    </section>
+
+    <section class="support-section" aria-label="Frequently asked questions and chat helper">
+      <section class="faq-panel" aria-labelledby="faqTitle">
+        <div class="support-heading">
+          <div><div class="eyebrow">QUICK ANSWERS</div><h2 id="faqTitle">Student driver FAQ</h2></div>
+        </div>
+        <details class="faq-item" open>
+          <summary>What does a deductible mean?</summary>
+          <p>It’s the amount you pay toward a covered claim before your insurer pays its share. Check which coverages have a deductible and choose an amount you could afford.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Can I drive my family’s car at school?</summary>
+          <p>Ask the owner and insurer how the policy applies, especially if you drive regularly or keep the car at school. Rules depend on the policy, household, and state.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Do good grades lower my rate?</summary>
+          <p>Some insurers offer a good-student discount, but eligibility and savings vary. Ask what proof is needed and compare the final quote.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What should I compare on two quotes?</summary>
+          <p>Match the drivers, vehicle, liability limits, deductibles, and optional coverage first. Then compare the total premium and payment schedule.</p>
+        </details>
+        <details class="faq-item">
+          <summary>What should I do after a crash?</summary>
+          <p>Put safety first and contact emergency services if needed. When safe, exchange details, document what happened, and contact your insurer. Follow local requirements.</p>
+        </details>
+      </section>
+
+      <aside class="chat-panel" aria-labelledby="chatTitle">
+        <div class="chat-heading">
+          <div><div class="eyebrow">CAMPUS COVER HELPER</div><h2 id="chatTitle">Ask a quick question.</h2></div>
+          <span class="chat-badge">QUICK GUIDE</span>
+        </div>
+        <p class="chat-disclaimer">I can explain common terms and comparisons. I’m not an insurer and can’t give quotes or confirm coverage.</p>
+        <div class="chat-log" id="chatLog" role="log" aria-live="polite" aria-relevant="additions">
+          <div class="chat-message bot"><span class="chat-speaker">Campus helper</span><p>Hey! Ask about deductibles, family cars, student discounts, or what to compare.</p></div>
+        </div>
+        <div class="chat-suggestions" aria-label="Suggested questions">
+          <button class="chat-suggestion" type="button" data-question="What is a deductible?">Deductible</button>
+          <button class="chat-suggestion" type="button" data-question="Can I drive my family car at school?">Family car</button>
+          <button class="chat-suggestion" type="button" data-question="Do good grades lower my rate?">Student discounts</button>
+        </div>
+        <form class="chat-form" id="chatForm">
+          <label class="sr-only" for="chatInput">Ask the insurance helper</label>
+          <input class="chat-input" id="chatInput" name="question" type="text" maxlength="240" placeholder="Ask about auto insurance..." autocomplete="off" required>
+          <button class="chat-send" type="submit">Send</button>
+        </form>
+        <p class="chat-local-note">This demo answers from a short built-in guide. It doesn’t send or save your question.</p>
+      </aside>
+    </section>
+
+    <footer class="bottom-note">
+      <p>General education only, not an insurance quote or legal advice. Coverage, requirements, and discounts vary by state and insurer. Confirm details directly with a licensed insurer.</p>
+      <a class="game-cta" href="campus-dash.html"><span>Ready to play? Start Campus Dash</span><span aria-hidden="true">→</span></a>
+    </footer>
+  </main>
+
+  <script>
+    const situations = {
+      own: {
+        title: 'Your car, your call',
+        copy: 'If the car is paid off, weigh the cost of collision and comprehensive against what you could afford to repair or replace yourself. State-required coverage still applies.'
+      },
+      family: {
+        title: 'Check before you borrow',
+        copy: 'Ask the owner and insurer whether you should be listed, especially if you drive the car regularly or take it to school. Rules depend on the policy, household, and state.'
+      },
+      finance: {
+        title: 'Check the loan or lease terms',
+        copy: 'A lender or lease may require collision and comprehensive. Confirm the required limits and deductible in your agreement before choosing coverage.'
+      }
+    };
+
+    const situationButtons = document.querySelectorAll('[data-situation]');
+    const situationTitle = document.getElementById('situationTitle');
+    const situationCopy = document.getElementById('situationCopy');
+
+    situationButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const selected = situations[button.dataset.situation];
+        situationButtons.forEach(option => option.setAttribute('aria-pressed', String(option === button)));
+        situationTitle.textContent = selected.title;
+        situationCopy.textContent = selected.copy;
+      });
+    });
+
+    const coverScenarios = {
+      pole: { title: 'Collision coverage', copy: 'Collision coverage may help repair your own vehicle after you hit a pole. A deductible generally applies, and the policy terms determine what is covered.', encountered: lastRun => lastRun.collisions > 0 || lastRun.encounters?.includes('collision') },
+      branch: { title: 'Comprehensive coverage', copy: 'Comprehensive coverage may help with certain non-collision damage, such as a fallen branch. Check the policy exclusions and deductible.', encountered: lastRun => lastRun.encounters?.includes('treeBranch') },
+      'other-car': { title: 'Liability coverage', copy: 'If you are legally responsible, auto liability may help pay for damage to someone else’s vehicle, up to your limits. It generally does not repair your own car.', encountered: lastRun => lastRun.collisions > 0 || lastRun.encounters?.includes('collision') },
+      fire: { title: 'Comprehensive coverage', copy: 'Comprehensive may cover certain vehicle fire damage, depending on the cause, exclusions, and policy terms. If a vehicle is smoking or burning, move away and contact emergency services.', encountered: lastRun => lastRun.encounters?.includes('fire') },
+      theft: { title: 'Comprehensive coverage', copy: 'Comprehensive may cover a stolen vehicle, subject to the policy and deductible. Personal belongings inside, like a laptop, are not automatically covered by auto insurance.', encountered: lastRun => lastRun.encounters?.includes('theft') }
+    };
+
+    let lastRun = {};
+    try {
+      lastRun = JSON.parse(localStorage.getItem('campus-dash-last-run') || '{}');
+    } catch {
+      lastRun = {};
+    }
+
+    const coverButtons = document.querySelectorAll('[data-cover-scenario]');
+    const coverScenarioTitle = document.getElementById('coverScenarioTitle');
+    const coverScenarioCopy = document.getElementById('coverScenarioCopy');
+    const runContext = document.getElementById('runContext');
+
+    coverButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const scenario = coverScenarios[button.dataset.coverScenario];
+        coverButtons.forEach(option => option.setAttribute('aria-pressed', String(option === button)));
+        coverScenarioTitle.textContent = scenario.title;
+        coverScenarioCopy.textContent = scenario.copy;
+        const wasEncountered = Array.isArray(lastRun.encounters) && scenario.encountered(lastRun);
+        runContext.hidden = !wasEncountered;
+        runContext.textContent = wasEncountered ? 'YOU ENCOUNTERED THIS IN CAMPUS DASH ON YOUR LAST RUN' : '';
+      });
+    });
+
+    const riskCheckForm = document.getElementById('riskCheckForm');
+    const riskCheckResult = document.getElementById('riskCheckResult');
+    riskCheckForm.addEventListener('submit', event => {
+      event.preventDefault();
+      const answers = new FormData(riskCheckForm);
+      const riskFlags = [
+        answers.get('locks') === 'no',
+        answers.get('valuables') === 'yes',
+        answers.get('deductible') === 'no',
+        answers.get('coverage') === 'no',
+        answers.get('crash') === 'no'
+      ];
+      const riskCount = riskFlags.filter(Boolean).length;
+      const level = riskCount <= 1 ? 'LOW' : riskCount <= 3 ? 'MODERATE' : 'HIGH';
+      const suggestions = [];
+      if (answers.get('locks') === 'no') suggestions.push('Lock the doors, take the keys, and park somewhere visible when possible.');
+      if (answers.get('valuables') === 'yes') suggestions.push('Keep valuables out of sight or take them with you; auto insurance does not automatically cover personal items.');
+      if (answers.get('deductible') === 'no') suggestions.push('Find your deductible in the policy documents and consider whether you could afford it.');
+      if (answers.get('coverage') === 'no') suggestions.push('Review your declarations page and note whether liability, collision, and comprehensive are included.');
+      if (answers.get('crash') === 'no') suggestions.push('Save a simple crash checklist: safety, injuries, exchange details, document the scene, and contact the insurer when appropriate.');
+      const generalSuggestions = [
+        'Ask the insurer about student, driver-training, and low-mileage discounts you may qualify for.',
+        'Compare quotes using the same drivers, vehicle, limits, and deductibles.',
+        'Avoid phone distraction and leave extra following distance in rain or heavy traffic.'
+      ];
+      for (const suggestion of generalSuggestions) {
+        if (suggestions.length >= 3) break;
+        suggestions.push(suggestion);
+      }
+
+      riskCheckResult.dataset.level = level.toLowerCase();
+      riskCheckResult.replaceChildren();
+      const heading = document.createElement('h3');
+      heading.textContent = `${level} PREPAREDNESS RISK`;
+      const summary = document.createElement('p');
+      summary.textContent = `${riskCount} of your answers point to habits worth reviewing. Start with these practical steps:`;
+      const list = document.createElement('ul');
+      suggestions.slice(0, 3).forEach(text => {
+        const item = document.createElement('li');
+        item.textContent = text;
+        list.append(item);
+      });
+      riskCheckResult.append(heading, summary, list);
+      riskCheckResult.hidden = false;
+    });
+
+    const chatAnswers = [
+      { matches: /deductible/i, answer: 'A deductible is your share of a covered claim before the insurer pays its share. Check which coverage it applies to, and choose an amount you could manage.' },
+      { matches: /family|borrow|parent/i, answer: 'Ask the car owner and insurer how the policy applies, especially if you drive regularly or keep the car at school. Household and state rules can differ.' },
+      { matches: /discount|grade|student|good.?student/i, answer: 'Some insurers offer good-student, driver-training, or low-mileage discounts. Ask about eligibility and compare the final price; savings vary.' },
+      { matches: /premium|price|cost|rate|monthly/i, answer: 'A premium is the price to keep a policy active. Compare the same drivers, vehicle, limits, and deductibles before judging which quote costs less.' },
+      { matches: /limit|liability|50\s*\/\s*100/i, answer: 'Liability can help pay for injuries or property damage you cause to others, up to your limits. In 50 / 100 / 50, the numbers commonly describe per-person injury / per-crash injury / property-damage limits.' },
+      { matches: /collision/i, answer: 'Collision can help repair your car after a covered crash, including hitting an object. Your deductible usually applies.' },
+      { matches: /comprehensive|theft|hail/i, answer: 'Comprehensive can help with certain covered non-crash losses, such as theft or hail. Check exclusions and the deductible in the policy.' },
+      { matches: /finance|lease|lender/i, answer: 'A lender or lease may require collision and comprehensive. Check your agreement for required limits and deductibles.' },
+      { matches: /crash|accident|claim|hit|wreck/i, answer: 'Prioritize safety and contact emergency services if needed. When safe, exchange details, document the scene, and contact your insurer. Follow local requirements.' },
+      { matches: /quote|compare/i, answer: 'Compare the same drivers, vehicle, liability limits, deductibles, and optional coverage. Then compare the total premium and payment schedule.' }
+    ];
+
+    const chatLog = document.getElementById('chatLog');
+    const chatForm = document.getElementById('chatForm');
+    const chatInput = document.getElementById('chatInput');
+
+    function addChatMessage(text, speaker) {
+      const message = document.createElement('div');
+      message.className = `chat-message ${speaker}`;
+      const label = document.createElement('span');
+      label.className = 'chat-speaker';
+      label.textContent = speaker === 'user' ? 'You' : 'Campus helper';
+      const body = document.createElement('p');
+      body.textContent = text;
+      message.append(label, body);
+      chatLog.append(message);
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    function askChatHelper(question) {
+      const text = question.trim();
+      if (!text) return;
+      addChatMessage(text, 'user');
+      const match = chatAnswers.find(entry => entry.matches.test(text));
+      const answer = match
+        ? match.answer
+        : 'I can help with deductibles, premiums, liability, collision, comprehensive, family cars, student discounts, and quote comparisons. For a specific policy or rate, check with the insurer.';
+      addChatMessage(answer, 'bot');
+    }
+
+    chatForm.addEventListener('submit', event => {
+      event.preventDefault();
+      askChatHelper(chatInput.value);
+      chatInput.value = '';
+      chatInput.focus();
+    });
+
+    document.querySelector('.chat-suggestions').addEventListener('click', event => {
+      const suggestion = event.target.closest('[data-question]');
+      if (suggestion) askChatHelper(suggestion.dataset.question);
+    });
+  </script>
+</body>
+</html>

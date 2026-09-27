@@ -1,0 +1,1237 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f3e8">
+  <title>Campus Dash | A student driving game</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+    :root {
+      color-scheme: light;
+      --ink: #192b2b;
+      --muted: #687a73;
+      --paper: #f4f3e8;
+      --line: #d7ddce;
+      --lime: #d3f36b;
+      --coral: #ff765f;
+      --teal: #217d73;
+      --mono: 'DM Mono', monospace;
+      --sans: 'DM Sans', sans-serif;
+      --display: 'Barlow Condensed', Impact, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: var(--sans);
+    }
+
+    button { color: inherit; font: inherit; }
+    button:focus-visible { outline: 3px solid var(--teal); outline-offset: 3px; }
+
+    .topbar {
+      min-height: 70px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      padding: 10px clamp(16px, 4vw, 54px);
+      border-bottom: 1px solid var(--line);
+      background: var(--paper);
+    }
+
+    .brand { display: flex; align-items: center; gap: 11px; }
+    .brand-mark { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 11px; color: var(--ink); background: var(--lime); font: 800 23px var(--display); transform: rotate(-5deg); }
+    .brand-name { font: 700 19px var(--display); letter-spacing: .04em; }
+    .brand-note { margin-top: 1px; color: var(--muted); font: 9px var(--mono); letter-spacing: .08em; }
+    .top-actions { display: flex; align-items: center; gap: 9px; }
+    .top-stat { min-width: 82px; padding: 4px 12px; border-left: 1px solid var(--line); }
+    .top-stat span { display: block; color: var(--muted); font: 9px var(--mono); letter-spacing: .08em; }
+    .top-stat strong { display: block; margin-top: 1px; font: 700 19px var(--display); }
+    .guide-link { min-height: 39px; display: inline-flex; align-items: center; gap: 7px; padding: 0 10px; border: 1px solid var(--line); border-radius: 6px; color: var(--teal); text-decoration: none; font: 9px var(--mono); letter-spacing: .04em; white-space: nowrap; }
+    .guide-link:hover { background: #e8ecdf; }
+    .guide-link-mark { width: 16px; height: 16px; display: grid; place-items: center; border-radius: 50%; color: var(--ink); background: var(--lime); font: 700 11px var(--sans); }
+    .icon-button { width: 39px; height: 39px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 6px; background: transparent; cursor: pointer; font-size: 17px; }
+    .icon-button:hover { background: #e8ecdf; }
+    .icon-button:disabled { opacity: .45; cursor: not-allowed; }
+
+    main { width: min(100%, 1360px); margin: 0 auto; padding: 20px clamp(12px, 3vw, 40px) 16px; }
+    .intro-row { display: flex; justify-content: space-between; align-items: end; gap: 20px; margin: 0 2px 13px; }
+    .eyebrow { margin-bottom: 5px; color: var(--teal); font: 10px var(--mono); letter-spacing: .13em; text-transform: uppercase; }
+    h1 { margin: 0; font: 700 clamp(28px, 4vw, 43px)/.98 var(--display); letter-spacing: .01em; }
+    .intro-copy { max-width: 330px; margin: 0 2px 3px 0; color: var(--muted); font-size: 12px; line-height: 1.5; text-align: right; }
+
+    .game-hud { min-height: 48px; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 6px 13px; border: 1px solid var(--line); border-bottom: 0; background: #fffef8; }
+    .hud-group { display: flex; align-items: center; gap: clamp(12px, 3vw, 29px); }
+    .hud-stat { display: flex; align-items: baseline; gap: 7px; white-space: nowrap; }
+    .hud-label { color: var(--muted); font: 9px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+    .hud-value { font: 700 21px var(--display); }
+    .hearts { color: #d95545; font-size: 16px; letter-spacing: 2px; }
+    .run-state { padding: 5px 8px; border-radius: 3px; color: #225d51; background: #e3f2db; font: 9px var(--mono); letter-spacing: .08em; }
+    .risk-meter { display: flex; align-items: center; gap: 7px; }
+    .risk-meter strong { min-width: 58px; color: #397b46; font: 700 12px var(--mono); }
+    .risk-meter[data-risk="moderate"] strong { color: #bb7a21; }
+    .risk-meter[data-risk="high"] strong { color: #c7493f; }
+    .risk-track { width: 54px; height: 6px; overflow: hidden; border-radius: 5px; background: #e4e9df; }
+    .risk-fill { width: 8%; height: 100%; border-radius: inherit; background: #67b868; transition: width 200ms ease, background 200ms ease; }
+    .risk-meter[data-risk="moderate"] .risk-fill { background: #e4ad49; }
+    .risk-meter[data-risk="high"] .risk-fill { background: #e36958; }
+    .fact-meter { min-height: 35px; display: flex; align-items: center; gap: 10px; padding: 5px 11px; border: 1px solid var(--line); border-top: 0; background: #fffef8; }
+    .fact-meter-label { color: var(--teal); font: 9px var(--mono); letter-spacing: .07em; white-space: nowrap; }
+    .fact-meter-label strong { margin-left: 5px; color: var(--ink); }
+    .fact-pips { display: flex; gap: 4px; }
+    .fact-pips span { width: 22px; height: 5px; border-radius: 4px; background: #e3e7dc; }
+    .fact-pips span.filled { background: #77c94a; }
+    .fact-hint { margin-left: auto; color: var(--muted); font-size: 10px; }
+
+    .stage { position: relative; overflow: hidden; background: #a8ce91; }
+    canvas { display: block; width: 100%; height: min(62vh, 680px); min-height: 390px; }
+    .screen-cover { position: absolute; inset: 0; display: grid; place-items: center; padding: 20px; background: #172726a8; transition: opacity 180ms ease; }
+    .screen-cover[hidden] { display: none; }
+    .dialog { width: min(100%, 405px); padding: 25px 27px 23px; border: 1px solid #ffffff75; border-radius: 8px; color: #f9f7ec; background: #193a36f2; box-shadow: 0 18px 50px #101c1b45; text-align: center; }
+    .dialog.report-dialog { width: min(100%, 680px); max-height: calc(100% - 12px); overflow-y: auto; }
+    .dialog-kicker { color: var(--lime); font: 10px var(--mono); letter-spacing: .14em; }
+    .dialog h2 { margin: 7px 0 6px; font: 700 clamp(34px, 7vw, 51px)/.9 var(--display); }
+    .dialog p { max-width: 310px; margin: 10px auto 18px; color: #d2dfd2; font-size: 12px; line-height: 1.55; }
+    .fact-list { display: grid; gap: 7px; margin: 13px 0 17px; padding: 0; list-style: none; text-align: left; }
+    .fact-list li { padding: 8px 10px; border-left: 3px solid var(--lime); border-radius: 3px; color: #dbe8dd; background: #ffffff0d; font-size: 11px; line-height: 1.45; }
+    .fact-list strong { display: block; margin-bottom: 2px; color: var(--lime); font: 600 15px var(--display); }
+    .event-content { max-height: min(48vh, 390px); overflow-y: auto; margin: 12px 0; text-align: left; }
+    .event-choices { display: grid; gap: 7px; }
+    .event-choice { width: 100%; min-height: 42px; padding: 9px 12px; border: 1px solid #577064; border-radius: 4px; color: #f1f4e9; background: #ffffff0a; cursor: pointer; font-size: 11px; line-height: 1.4; text-align: left; }
+    .event-choice:hover { border-color: var(--lime); background: #ffffff14; }
+    .event-choice:disabled { cursor: default; }
+    .event-choice.correct { border-color: #8cce71; background: #37643b; }
+    .event-choice.incorrect { border-color: #d98570; background: #633a35; }
+    .event-timer { margin-bottom: 8px; color: var(--gold); font: 10px var(--mono); }
+    .incident-checklist { display: grid; gap: 6px; }
+    .incident-step { display: flex; align-items: start; gap: 8px; padding: 7px 8px; border: 1px solid #ffffff19; border-radius: 4px; background: #ffffff08; color: #e2e9df; font-size: 10px; line-height: 1.45; text-align: left; }
+    .incident-step input { margin-top: 2px; accent-color: var(--lime); }
+    .report-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: 9px 0; }
+    .report-stat { padding: 7px 6px; border: 1px solid #ffffff1c; border-radius: 4px; background: #ffffff08; text-align: center; }
+    .report-stat strong { display: block; color: var(--lime); font: 700 17px var(--display); }
+    .report-stat span { display: block; margin-top: 2px; color: #c5d3c8; font: 8px var(--mono); line-height: 1.35; text-transform: uppercase; }
+    .report-subhead { margin: 10px 0 5px; color: var(--lime); font: 9px var(--mono); letter-spacing: .09em; }
+    .report-observations, .report-badges { display: grid; gap: 5px; margin: 0; padding: 0; list-style: none; }
+    .report-observations li, .report-badge { padding: 6px 8px; border-left: 2px solid #8cce71; background: #ffffff08; color: #e1e9df; font-size: 9px; line-height: 1.4; }
+    .report-badges { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .report-badge { border-left-color: var(--gold); }
+    .report-badge.locked { opacity: .48; border-left-color: #718078; }
+    .report-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+    .report-link { min-height: 34px; display: inline-flex; justify-content: center; align-items: center; padding: 0 10px; border: 1px solid #688071; border-radius: 4px; color: #eef2e7; text-decoration: none; font-size: 9px; font-weight: 600; }
+    .report-link:hover { border-color: var(--lime); color: var(--lime); }
+    .primary-button { min-height: 46px; padding: 0 21px; border: 0; border-radius: 5px; color: var(--ink); background: var(--lime); cursor: pointer; font-size: 13px; font-weight: 700; }
+    .primary-button:hover { background: #e2ff87; transform: translateY(-1px); }
+    .dialog-hint { margin-top: 12px; color: #bdcec5; font: 9px var(--mono); }
+
+    .controls-row { min-height: 57px; display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 9px 2px 0; }
+    .controls-copy { color: var(--muted); font-size: 11px; }
+    .key { display: inline-grid; min-width: 25px; height: 25px; place-items: center; margin: 0 2px; padding: 0 5px; border: 1px solid #cbd2c4; border-bottom-width: 2px; border-radius: 4px; color: #314944; background: #fffef8; font: 10px var(--mono); }
+    .touch-controls { display: none; gap: 9px; }
+    .touch-button { width: 54px; height: 43px; border: 1px solid var(--line); border-radius: 6px; background: #fffef8; cursor: pointer; font-size: 20px; touch-action: manipulation; }
+    .touch-button:active { background: var(--lime); }
+    .footnote { color: #839088; font: 9px var(--mono); }
+
+    @media (max-width: 680px) {
+      .topbar { min-height: 60px; }
+      .brand-mark { width: 33px; height: 33px; }
+      .guide-link { width: 35px; min-height: 35px; justify-content: center; padding: 0; }
+      .guide-link-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+      .top-stat { min-width: 58px; padding: 3px 8px; }
+      .top-stat span { font-size: 8px; }
+      .top-stat strong { font-size: 17px; }
+      main { padding-top: 15px; }
+      .intro-row { align-items: start; flex-direction: column; gap: 5px; }
+      .intro-copy { text-align: left; }
+      .game-hud { min-height: 42px; flex-wrap: wrap; gap: 3px 8px; padding: 5px 8px; }
+      .game-hud > .hud-group { flex: 1 1 100%; justify-content: space-between; min-width: 0; }
+      .game-hud > .hud-group:last-child { gap: 6px; }
+      .hud-group { gap: 12px; }
+      .hud-label { font-size: 8px; }
+      .hud-value { font-size: 18px; }
+      .hearts { font-size: 14px; }
+      .risk-meter { gap: 4px; }
+      .risk-meter strong { min-width: 48px; font-size: 10px; }
+      .risk-track { display: none; }
+      .fact-meter { min-height: 33px; gap: 7px; padding: 5px 8px; }
+      .fact-meter-label { font-size: 8px; }
+      .fact-pips span { width: 17px; }
+      .fact-hint { font-size: 9px; }
+      canvas { height: min(56vh, 460px); min-height: 280px; }
+      .screen-cover { padding: 10px; }
+      .dialog { padding: 16px 17px; }
+      .dialog p { margin: 6px auto 9px; line-height: 1.35; }
+      .fact-list { gap: 4px; margin: 8px 0 10px; }
+      .fact-list li { padding: 5px 8px; font-size: 10px; line-height: 1.3; }
+      .fact-list strong { margin-bottom: 1px; font-size: 14px; }
+      .dialog-hint { margin-top: 7px; }
+      .primary-button { min-height: 40px; }
+      .controls-row { align-items: center; }
+      .touch-controls { display: flex; }
+      .controls-copy { font-size: 10px; }
+      .footnote { display: none; }
+    }
+
+    @media (max-width: 390px) {
+      .brand-note { font-size: 8px; }
+      .top-actions { gap: 5px; }
+      .top-stat { min-width: 50px; }
+      .icon-button { width: 35px; height: 35px; }
+      .run-state { padding: 4px 6px; font-size: 8px; }
+      .hud-group { gap: 5px; }
+      .hud-stat { gap: 4px; }
+      .hud-label { letter-spacing: .02em; }
+      .run-state { padding: 3px 4px; font-size: 7px; white-space: nowrap; }
+      .report-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      canvas { height: min(56vh, 460px); min-height: 280px; }
+    }
+
+    @media (max-width: 680px) and (max-height: 700px) {
+      canvas { height: min(68vh, 380px); min-height: 300px; }
+      .dialog { padding: 11px 12px; }
+      .dialog h2 { margin: 4px 0; font-size: 32px; }
+      .dialog p { margin: 4px auto 7px; font-size: 10px; }
+      .fact-list { gap: 3px; margin: 5px 0 7px; }
+      .fact-list li { padding: 4px 7px; font-size: 9px; }
+      .fact-list strong { font-size: 13px; }
+      .dialog-hint { display: none; }
+      .primary-button { min-height: 36px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">C</span>
+      <div><div class="brand-name">CAMPUS DASH</div><div class="brand-note">THE STUDENT DRIVING ARCADE</div></div>
+    </div>
+    <div class="top-actions">
+      <div class="top-stat"><span>BEST RUN</span><strong id="bestScore">0000</strong></div>
+      <a class="guide-link" href="insurance-guide.html" title="Insurance 101"><span class="guide-link-mark" aria-hidden="true">i</span><span class="guide-link-label">INSURANCE 101</span></a>
+      <button class="icon-button" id="pauseButton" type="button" aria-label="Pause game" title="Pause game">Ⅱ</button>
+      <button class="icon-button" id="restartButton" type="button" aria-label="Restart game" title="Restart game">↻</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="intro-row" aria-labelledby="gameTitle">
+      <div><div class="eyebrow">CAMPUS RUSH · 45 SECOND TIME ATTACK</div><h1 id="gameTitle">Beat the campus rush.</h1></div>
+      <p class="intro-copy">Dodge the road chaos. Grab campus credits and green insurance terms. Three terms unlock a quick fact stop.</p>
+    </section>
+
+    <section class="game-hud" aria-label="Game status">
+      <div class="hud-group">
+        <div class="hud-stat"><span class="hud-label">Score</span><strong class="hud-value" id="score">0000</strong></div>
+        <div class="hud-stat"><span class="hud-label">Credits</span><strong class="hud-value" id="credits">0</strong></div>
+      </div>
+      <div class="hud-group">
+        <div class="hud-stat"><span class="hud-label">Time</span><strong class="hud-value" id="time">45</strong></div>
+        <div class="hud-stat"><span class="hud-label">Bumpers</span><strong class="hearts" id="hearts" aria-label="3 bumpers remaining">♥ ♥ ♥</strong></div>
+        <div class="risk-meter" id="riskMeter" data-risk="low" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Risk level low">
+          <span class="hud-label">RISK</span><strong id="riskLabel">LOW</strong><span class="risk-track" aria-hidden="true"><span class="risk-fill" id="riskFill"></span></span>
+        </div>
+        <span class="run-state" id="runState">READY</span>
+      </div>
+    </section>
+    <div class="fact-meter" aria-label="Insurance term progress">
+      <div class="fact-meter-label">GREEN TERMS<strong id="termCount">0 / 3</strong></div>
+      <div class="fact-pips" id="termPips" aria-hidden="true"><span></span><span></span><span></span></div>
+      <span class="fact-hint">3 terms = an insurance pit stop</span>
+    </div>
+
+    <section class="stage" aria-label="Campus Dash game">
+      <canvas id="gameCanvas" role="img" aria-label="Top-down campus road. Steer around obstacles and collect green insurance-term buttons and campus credits."></canvas>
+      <div class="screen-cover" id="screenCover">
+        <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialogTitle" aria-describedby="dialogCopy">
+          <div class="dialog-kicker" id="dialogKicker">45 SECOND RUN</div>
+          <h2 id="dialogTitle">Ready, driver?</h2>
+          <p id="dialogCopy">Switch lanes to dodge cones and potholes. Grab gold credits and green insurance-term buttons. Three bumps and the run is over.</p>
+          <ul class="fact-list" id="factList" hidden></ul>
+          <div class="event-content" id="eventContent" hidden></div>
+          <button class="primary-button" id="startButton" type="button">Start your engine</button>
+          <div class="dialog-hint">ARROW KEYS OR A / D TO STEER · P TO PAUSE</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="controls-row">
+      <div class="controls-copy"><span class="key">←</span><span class="key">→</span> or <span class="key">A</span><span class="key">D</span> to change lanes <span class="footnote"> · P pauses · R restarts</span></div>
+      <div class="touch-controls" aria-label="Touch driving controls">
+        <button class="touch-button" id="leftButton" type="button" aria-label="Move left">←</button>
+        <button class="touch-button" id="rightButton" type="button" aria-label="Move right">→</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const scoreLabel = document.getElementById('score');
+    const creditsLabel = document.getElementById('credits');
+    const timeLabel = document.getElementById('time');
+    const heartsLabel = document.getElementById('hearts');
+    const runStateLabel = document.getElementById('runState');
+    const screenCover = document.getElementById('screenCover');
+    const dialogKicker = document.getElementById('dialogKicker');
+    const dialogTitle = document.getElementById('dialogTitle');
+    const dialogCopy = document.getElementById('dialogCopy');
+    const factList = document.getElementById('factList');
+    const termCountLabel = document.getElementById('termCount');
+    const termPips = document.getElementById('termPips');
+    const eventContent = document.getElementById('eventContent');
+    const riskMeter = document.getElementById('riskMeter');
+    const riskLabel = document.getElementById('riskLabel');
+    const startButton = document.getElementById('startButton');
+    const pauseButton = document.getElementById('pauseButton');
+    const bestScoreLabel = document.getElementById('bestScore');
+
+    const laneCount = 3;
+    const runDuration = 45;
+    const insuranceTerms = [
+      { term: 'Liability', fact: 'Can help pay for injuries or property damage you cause to others, up to your policy limits.' },
+      { term: 'Deductible', fact: 'The amount you pay toward a covered claim before your insurer pays its share.' },
+      { term: 'Collision', fact: 'Can help repair your car after a covered crash, even if you hit an object. Your deductible applies.' },
+      { term: 'Premium', fact: 'The price you pay to keep a policy active. Compare the same coverages, not just the monthly price.' },
+      { term: 'Comprehensive', fact: 'Can help with certain non-crash losses, such as theft, hail, or a fallen branch.' },
+      { term: 'Roadside', fact: 'Towing or jump-start help may be an add-on. Check whether another service already covers you.' },
+      { term: 'Uninsured motorist', fact: 'Can help with certain costs after a crash with an uninsured driver, depending on your policy and state.' }
+    ];
+    const termQuestions = {
+      Liability: { question: 'You damage another driver’s car and are responsible. Which coverage generally applies to their damage?', answer: 'Liability', options: ['Liability', 'Collision', 'Comprehensive'], explanation: 'Liability may cover others’ property damage when you are legally responsible, up to your policy limits.' },
+      Collision: { question: 'You back into a pole and damage your car. Which coverage may help repair your vehicle?', answer: 'Collision', options: ['Collision', 'Liability', 'Roadside'], explanation: 'Collision may help repair your car after hitting an object. Your deductible generally applies.' },
+      Comprehensive: { question: 'A laptop is stolen from your locked car. Which statement is most accurate?', answer: 'Vehicle theft coverage', options: ['Vehicle theft coverage', 'All belongings are covered', 'Liability pays for it'], explanation: 'Comprehensive may cover theft of the vehicle itself. Personal belongings, such as a laptop, are not automatically covered by auto insurance.' },
+      Deductible: { question: 'Your covered repair costs $1,200 and your deductible is $500. What is the deductible?', answer: '$500', options: ['$500', '$700', '$1,200'], explanation: 'The deductible is your share of a covered claim before the insurer pays its share, subject to policy terms.' },
+      Premium: { question: 'What does an auto insurance premium mean?', answer: 'The policy price', options: ['The policy price', 'The repair deductible', 'A claim limit'], explanation: 'A premium is the price to keep a policy active. Compare the same coverages and drivers when comparing premiums.' },
+      Roadside: { question: 'Your battery dies before class. What may roadside assistance provide?', answer: 'Jump-start help', options: ['Jump-start help', 'Laptop replacement', 'Crash liability'], explanation: 'Roadside assistance may include a jump-start or tow. Check limits and whether another service already provides it.' },
+      'Uninsured motorist': { question: 'An uninsured driver hits you. Which coverage may help with certain costs?', answer: 'Uninsured motorist', options: ['Uninsured motorist', 'Comprehensive only', 'Roadside only'], explanation: 'Uninsured-motorist coverage may help with certain costs, depending on your policy and state.' }
+    };
+    const decisionScenarios = [
+      { category: 'theft', prompt: 'You are parking near campus for the night.', safeChoice: 'Put valuables out of sight, lock the doors, and choose a well-lit spot.', riskyChoice: 'Leave your backpack visible and park in the darkest corner.', safeFeedback: 'Good call. Hiding valuables, locking up, and choosing a visible spot can reduce theft risk.', riskyFeedback: 'Visible belongings can invite theft. Put valuables away, lock the vehicle, and choose a visible spot.' },
+      { category: 'weather', prompt: 'Heavy rain starts on the road and the pavement is slick.', safeChoice: 'Slow down, increase following distance, and avoid sudden moves.', riskyChoice: 'Keep your speed and follow the car ahead closely.', safeFeedback: 'Smart adjustment. Extra space and a slower speed help you react on a wet road.', riskyFeedback: 'Following closely on slick pavement leaves less time to stop. Slow down and leave more space.' },
+      { category: 'distraction', prompt: 'Your phone buzzes while you are driving through campus.', safeChoice: 'Keep your eyes on the road; check it after parking safely.', riskyChoice: 'Glance down and reply while rolling slowly.', safeFeedback: 'Nice focus. Wait until parked safely before using the phone.', riskyFeedback: 'Even a quick glance takes attention from the road. Wait until you are safely parked.' },
+      { category: 'fire', prompt: 'You smell smoke and see a warning light while driving.', safeChoice: 'Pull over somewhere safe, turn off the vehicle, get out, move away, and call for help.', riskyChoice: 'Keep driving to your destination and investigate there.', safeFeedback: 'Safety first. If there is smoke or fire, stop somewhere safe, move away, and contact emergency services.', riskyFeedback: 'Continuing to drive could increase danger. Stop safely, get away from the vehicle, and call for help.' },
+      { category: 'fatigue', prompt: 'You are driving back after a long late-night study session and feel drowsy.', safeChoice: 'Stop somewhere safe and arrange a rest or another ride.', riskyChoice: 'Open the window and push through the drive.', safeFeedback: 'Good judgment. Rest or another ride is safer than driving while drowsy.', riskyFeedback: 'Fresh air is not a reliable fix for drowsiness. Stop safely and rest or arrange another ride.' },
+      { category: 'parking', prompt: 'You need to leave your car in a busy student lot for several hours.', safeChoice: 'Lock it, take the keys, and park in a visible area.', riskyChoice: 'Leave it unlocked for convenience and hide the spare key nearby.', safeFeedback: 'Good routine. Lock the doors, take the keys, and avoid leaving a spare key accessible.', riskyFeedback: 'An unlocked car or accessible spare key raises avoidable risk. Lock up and take the keys.' }
+    ];
+    const badgeCatalog = [
+      { id: 'risk-ready', name: 'Risk Ready', icon: '🛡', description: 'Finish with LOW risk after at least 3 safe choices.' },
+      { id: 'collision-conscious', name: 'Collision Conscious', icon: '🚗', description: 'Avoid 5 hazards without a collision.' },
+      { id: 'theft-smart', name: 'Theft Smart', icon: '🔐', description: 'Make a safe choice in a theft scenario.' },
+      { id: 'fire-ready', name: 'Fire Ready', icon: '🔥', description: 'Choose the safe response to a fire warning.' },
+      { id: 'coverage-scholar', name: 'Coverage Scholar', icon: '📚', description: 'Answer an insurance question correctly.' },
+      { id: 'campus-safety-pro', name: 'Campus Safety Pro', icon: '🏆', description: 'Finish with LOW risk, 5 safe choices, and no more than one collision.' }
+    ];
+    let width = 0;
+    let height = 0;
+    let pixelRatio = 1;
+    let state = 'ready';
+    let lane = 1;
+    let displayedLane = 1;
+    let lives = 3;
+    let credits = 0;
+    let risk = 0;
+    let hazardsAvoided = 0;
+    let collisions = 0;
+    let safeDecisions = 0;
+    let correctAnswers = 0;
+    let termsLearned = 0;
+    let decisionTimer = 0;
+    let currentDecision = null;
+    let currentQuestion = null;
+    let incidentTimer = 0;
+    let encounteredCategories = new Set();
+    let discoveredTerms = new Set();
+    let riskyDecisionCategories = new Set();
+    let runBadges = new Set();
+    let pendingFacts = [];
+    let termDeck = [];
+    let termIndex = 0;
+    let spawnCount = 0;
+    let score = 0;
+    let remaining = runDuration;
+    let roadOffset = 0;
+    let spawnTimer = 0.7;
+    let invulnerable = 0;
+    let objects = [];
+    let particles = [];
+    let lastFrame = 0;
+    let bestScore = loadBestScore();
+    let gameProgress = loadGameProgress();
+
+    function loadGameProgress() {
+      try {
+        const stored = JSON.parse(localStorage.getItem('campus-dash-progress') || '{}');
+        return {
+          badges: Array.isArray(stored.badges) ? stored.badges.filter(id => badgeCatalog.some(badge => badge.id === id)) : [],
+          terms: Array.isArray(stored.terms) ? stored.terms.filter(term => insuranceTerms.some(item => item.term === term)) : [],
+          encounters: Array.isArray(stored.encounters) ? stored.encounters.filter(category => typeof category === 'string') : []
+        };
+      } catch {
+        return { badges: [], terms: [], encounters: [] };
+      }
+    }
+
+    function saveGameProgress() {
+      try {
+        localStorage.setItem('campus-dash-progress', JSON.stringify(gameProgress));
+      } catch {
+        // Progress remains available for the current run if storage is unavailable.
+      }
+    }
+
+    function shuffle(items) {
+      const result = [...items];
+      for (let index = result.length - 1; index > 0; index--) {
+        const swapIndex = Math.floor(Math.random() * (index + 1));
+        [result[index], result[swapIndex]] = [result[swapIndex], result[index]];
+      }
+      return result;
+    }
+
+    function loadBestScore() {
+      try {
+        return Number(localStorage.getItem('campus-dash-best')) || 0;
+      } catch {
+        return 0;
+      }
+    }
+
+    function saveBestScore() {
+      try {
+        localStorage.setItem('campus-dash-best', String(bestScore));
+      } catch {
+        // The game still works when browser storage is unavailable.
+      }
+    }
+
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+      width = rect.width;
+      height = rect.height;
+      canvas.width = Math.round(width * pixelRatio);
+      canvas.height = Math.round(height * pixelRatio);
+      ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+      draw();
+    }
+
+    function roadGeometry() {
+      const roadWidth = Math.min(width * 0.58, 500);
+      const left = (width - roadWidth) / 2;
+      const laneWidth = roadWidth / laneCount;
+      return { roadWidth, left, laneWidth };
+    }
+
+    function laneCenter(index) {
+      const road = roadGeometry();
+      return road.left + road.laneWidth * (index + 0.5);
+    }
+
+    function roundedRect(x, y, w, h, radius, color) {
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.roundRect(x, y, w, h, radius);
+      ctx.fill();
+    }
+
+    function drawTree(x, y, scale, alternate) {
+      ctx.fillStyle = '#795c43';
+      ctx.fillRect(x - 3 * scale, y + 7 * scale, 6 * scale, 15 * scale);
+      ctx.fillStyle = alternate ? '#38775c' : '#4f9366';
+      ctx.beginPath();
+      ctx.arc(x, y, 13 * scale, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = alternate ? '#619d6b' : '#70aa70';
+      ctx.beginPath();
+      ctx.arc(x - 5 * scale, y - 4 * scale, 6 * scale, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawCampus() {
+      const road = roadGeometry();
+      ctx.fillStyle = '#b6d99c';
+      ctx.fillRect(0, 0, width, height);
+
+      const offset = (roadOffset * 0.48) % 170;
+      for (let index = -1; index < Math.ceil(height / 170) + 1; index++) {
+        const y = index * 170 + offset;
+        roundedRect(15, y + 15, Math.max(36, road.left * 0.25), 49, 6, '#e2b47d');
+        roundedRect(road.left * 0.7, y + 38, Math.max(28, road.left * 0.18), 35, 5, '#d57f67');
+        roundedRect(width - road.left * 0.25 - 48, y + 93, 48, 43, 5, '#e7ce85');
+        drawTree(road.left * 0.43, y + 113, 0.9, index % 2 === 0);
+        drawTree(width - road.left * 0.45, y + 28, 1, index % 2 !== 0);
+        drawTree(width - road.left * 0.52, y + 148, 0.78, index % 2 === 0);
+      }
+
+      ctx.fillStyle = '#d8d2bd';
+      ctx.fillRect(road.left - 11, 0, road.roadWidth + 22, height);
+      ctx.fillStyle = '#4a5452';
+      ctx.fillRect(road.left, 0, road.roadWidth, height);
+      ctx.fillStyle = '#f8f1d9';
+      ctx.fillRect(road.left + 5, 0, 4, height);
+      ctx.fillRect(road.left + road.roadWidth - 9, 0, 4, height);
+
+      ctx.strokeStyle = '#f0eddb';
+      ctx.lineWidth = 3;
+      ctx.setLineDash([23, 20]);
+      ctx.lineDashOffset = -roadOffset;
+      for (let index = 1; index < laneCount; index++) {
+        const x = road.left + road.laneWidth * index;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = '#ec765e';
+      ctx.fillRect(road.left - 11, 0, 4, height);
+      ctx.fillRect(road.left + road.roadWidth + 7, 0, 4, height);
+    }
+
+    function drawCar(x, y, carWidth, color, isPlayer = false) {
+      const carHeight = carWidth * 1.62;
+      ctx.save();
+      ctx.translate(x, y);
+      if (isPlayer && invulnerable > 0 && Math.floor(invulnerable * 12) % 2 === 0) ctx.globalAlpha = 0.45;
+      ctx.fillStyle = '#253431';
+      roundedRect(-carWidth * 0.54, -carHeight * 0.43, carWidth * 0.16, carHeight * 0.31, 4, '#263936');
+      roundedRect(carWidth * 0.38, -carHeight * 0.43, carWidth * 0.16, carHeight * 0.31, 4, '#263936');
+      roundedRect(-carWidth * 0.54, carHeight * 0.16, carWidth * 0.16, carHeight * 0.31, 4, '#263936');
+      roundedRect(carWidth * 0.38, carHeight * 0.16, carWidth * 0.16, carHeight * 0.31, 4, '#263936');
+      roundedRect(-carWidth / 2, -carHeight / 2, carWidth, carHeight, carWidth * 0.23, color);
+      roundedRect(-carWidth * 0.34, -carHeight * 0.22, carWidth * 0.68, carHeight * 0.32, 5, isPlayer ? '#b7e4d4' : '#c7d5cb');
+      roundedRect(-carWidth * 0.3, carHeight * 0.15, carWidth * 0.6, carHeight * 0.2, 5, isPlayer ? '#4b8476' : '#6e8279');
+      ctx.fillStyle = '#fff3c6';
+      ctx.fillRect(-carWidth * 0.36, -carHeight * 0.48, carWidth * 0.2, 4);
+      ctx.fillRect(carWidth * 0.16, -carHeight * 0.48, carWidth * 0.2, 4);
+      ctx.fillStyle = '#f3f3e8';
+      ctx.fillRect(-carWidth * 0.27, carHeight * 0.39, carWidth * 0.16, 3);
+      ctx.fillRect(carWidth * 0.11, carHeight * 0.39, carWidth * 0.16, 3);
+      if (isPlayer) {
+        ctx.fillStyle = '#1d3c36';
+        ctx.font = `700 ${Math.max(10, carWidth * 0.27)}px Barlow Condensed, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('C', 0, carHeight * 0.01);
+      }
+      ctx.restore();
+    }
+
+    function drawCone(x, y, size) {
+      ctx.fillStyle = '#df634e';
+      ctx.beginPath();
+      ctx.moveTo(x, y - size * 0.72);
+      ctx.lineTo(x - size * 0.43, y + size * 0.38);
+      ctx.lineTo(x + size * 0.43, y + size * 0.38);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#fff0d5';
+      ctx.beginPath();
+      ctx.moveTo(x - size * 0.24, y + size * 0.02);
+      ctx.lineTo(x + size * 0.24, y + size * 0.02);
+      ctx.lineTo(x + size * 0.34, y + size * 0.2);
+      ctx.lineTo(x - size * 0.34, y + size * 0.2);
+      ctx.closePath();
+      ctx.fill();
+      roundedRect(x - size * 0.55, y + size * 0.35, size * 1.1, size * 0.18, 3, '#f8d185');
+    }
+
+    function drawToken(x, y, size) {
+      ctx.fillStyle = '#f4d45d';
+      ctx.beginPath();
+      ctx.arc(x, y, size * 0.39, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#fff2a4';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(x, y, size * 0.53, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.fillStyle = '#715b21';
+      ctx.font = `700 ${size * 0.55}px Barlow Condensed, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('C', x, y + 1);
+    }
+
+    function drawTermButton(x, y, laneWidth, term) {
+      const buttonWidth = Math.min(laneWidth * 0.92, 146);
+      const buttonHeight = Math.min(29, laneWidth * 0.28);
+      roundedRect(x - buttonWidth / 2 + 2, y - buttonHeight / 2 + 4, buttonWidth, buttonHeight, 7, '#183c32');
+      roundedRect(x - buttonWidth / 2, y - buttonHeight / 2, buttonWidth, buttonHeight, 7, '#8bdf50');
+      ctx.strokeStyle = '#d9ff9d';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(x - buttonWidth / 2 + 2, y - buttonHeight / 2 + 2, buttonWidth - 4, buttonHeight - 4, 5);
+      ctx.stroke();
+      ctx.fillStyle = '#173c30';
+      ctx.font = `700 ${Math.min(11, Math.max(6, laneWidth * 0.065))}px Barlow Condensed, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(term.toUpperCase(), x, y);
+    }
+
+    function drawPedestrian(x, y, size) {
+      ctx.fillStyle = '#243330';
+      roundedRect(x - size * 0.25, y - size * 0.2, size * 0.5, size * 0.65, size * 0.2, '#e8d1a5');
+      ctx.fillStyle = '#324747';
+      ctx.beginPath();
+      ctx.arc(x, y - size * 0.34, size * 0.18, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#243330';
+      ctx.lineWidth = Math.max(2, size * 0.09);
+      ctx.beginPath();
+      ctx.moveTo(x - size * 0.1, y + size * 0.38);
+      ctx.lineTo(x - size * 0.22, y + size * 0.62);
+      ctx.moveTo(x + size * 0.1, y + size * 0.38);
+      ctx.lineTo(x + size * 0.22, y + size * 0.62);
+      ctx.stroke();
+    }
+
+    function drawBranch(x, y, size) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(-0.22);
+      ctx.strokeStyle = '#815c3d';
+      ctx.lineWidth = size * 0.2;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(-size * 0.62, size * 0.22);
+      ctx.lineTo(size * 0.6, -size * 0.2);
+      ctx.moveTo(-size * 0.05, 0);
+      ctx.lineTo(-size * 0.26, -size * 0.42);
+      ctx.moveTo(size * 0.2, -size * 0.05);
+      ctx.lineTo(size * 0.42, size * 0.36);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawPothole(x, y, size) {
+      ctx.fillStyle = '#292f30';
+      ctx.beginPath();
+      ctx.ellipse(x, y, size * 0.62, size * 0.38, -0.15, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#41494a';
+      ctx.beginPath();
+      ctx.ellipse(x - size * 0.1, y - size * 0.07, size * 0.38, size * 0.17, -0.15, Math.PI, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawObject(item) {
+      const road = roadGeometry();
+      const x = road.left + road.laneWidth * (item.lane + 0.5);
+      const size = Math.min(road.laneWidth * 0.42, 42);
+      if (item.type === 'fact') drawTermButton(x, item.y, road.laneWidth, item.fact.term);
+      else if (item.type === 'token') drawToken(x, item.y, size * 0.8);
+      else if (item.type === 'cone') drawCone(x, item.y, size);
+      else if (item.type === 'parked') drawCar(x, item.y, size * 1.05, '#d77d64');
+      else if (item.type === 'pedestrian') drawPedestrian(x, item.y, size);
+      else if (item.type === 'branch') drawBranch(x, item.y, size);
+      else if (item.type === 'wetRoad') {
+        ctx.fillStyle = '#78b6c555';
+        ctx.beginPath();
+        ctx.ellipse(x, item.y, size * 0.7, size * 0.42, -0.1, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#d8f2f388';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.ellipse(x, item.y, size * 0.53, size * 0.3, -0.1, 0, Math.PI * 2);
+        ctx.stroke();
+      } else drawPothole(x, item.y, size);
+    }
+
+    function drawParticles() {
+      for (const particle of particles) {
+        ctx.globalAlpha = Math.max(0, particle.life / 0.55);
+        ctx.fillStyle = particle.color;
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    function draw() {
+      if (!ctx || !width || !height) return;
+      ctx.clearRect(0, 0, width, height);
+      drawCampus();
+      const road = roadGeometry();
+      for (const item of objects) drawObject(item);
+      drawParticles();
+      const carWidth = Math.min(road.laneWidth * 0.43, 57);
+      const carY = height * 0.78;
+      drawCar(laneCenter(displayedLane), carY, carWidth, '#d4f36b', true);
+      if (state === 'ready') {
+        ctx.fillStyle = '#ffffffaa';
+        ctx.font = '500 11px DM Mono, monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('CAMPUS LOOP  ·  3 LANES  ·  1 VERY BUSY AFTERNOON', width / 2, height - 18);
+      }
+    }
+
+    function popParticles(x, y, color) {
+      for (let index = 0; index < 9; index++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 34 + Math.random() * 95;
+        particles.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, life: 0.55, size: 2 + Math.random() * 3, color });
+      }
+    }
+
+    function spawnObject() {
+      const roll = Math.random();
+      spawnCount += 1;
+      if (spawnCount % 4 === 0) {
+        if (termIndex === termDeck.length) {
+          termDeck = shuffle(insuranceTerms);
+          termIndex = 0;
+        }
+        objects.push({ lane: Math.floor(Math.random() * laneCount), y: -35, type: 'fact', fact: termDeck[termIndex++], passed: false });
+        return;
+      }
+      const type = roll < 0.16 ? 'token' : shuffle(['cone', 'pothole', 'parked', 'pedestrian', 'branch', 'wetRoad'])[0];
+      const categories = { cone: 'cone', pothole: 'pothole', parked: 'parking', pedestrian: 'pedestrian', branch: 'treeBranch', wetRoad: 'weather' };
+      rememberEncounter(categories[type]);
+      objects.push({ lane: Math.floor(Math.random() * laneCount), y: -35, type, passed: false });
+    }
+
+    function updateTermMeter() {
+      termCountLabel.textContent = `${pendingFacts.length} / 3`;
+      termPips.querySelectorAll('span').forEach((pip, index) => {
+        pip.classList.toggle('filled', index < pendingFacts.length);
+      });
+    }
+
+    function updateHud() {
+      scoreLabel.textContent = String(score).padStart(4, '0');
+      creditsLabel.textContent = credits;
+      timeLabel.textContent = String(Math.ceil(remaining)).padStart(2, '0');
+      heartsLabel.textContent = `${'♥ '.repeat(lives).trim()}${lives ? '' : '—'}`;
+      heartsLabel.setAttribute('aria-label', `${lives} ${lives === 1 ? 'bumper' : 'bumpers'} remaining`);
+      bestScoreLabel.textContent = String(bestScore).padStart(4, '0');
+      const riskName = risk < 30 ? 'low' : risk < 65 ? 'moderate' : 'high';
+      riskMeter.dataset.risk = riskName;
+      riskMeter.setAttribute('aria-valuenow', String(risk));
+      document.getElementById('riskFill').style.width = `${Math.max(8, risk)}%`;
+      riskLabel.textContent = riskName.toUpperCase();
+      riskMeter.setAttribute('aria-label', `Risk level ${riskName}`);
+      const labels = { ready: 'READY', running: 'IN RUN', paused: 'PAUSED', decision: 'DECISION', decisionFeedback: 'DECISION', incident: 'CHECKLIST', incidentReady: 'CLAIM READY', quiz: 'PIT STOP', quizAnswered: 'PIT STOP', over: 'REPORT' };
+      runStateLabel.textContent = labels[state];
+      pauseButton.textContent = state === 'paused' ? '▶' : 'Ⅱ';
+      pauseButton.setAttribute('aria-label', state === 'paused' ? 'Resume game' : 'Pause game');
+      pauseButton.title = state === 'paused' ? 'Resume game' : 'Pause game';
+      pauseButton.disabled = state !== 'running' && state !== 'paused';
+      updateTermMeter();
+    }
+
+    function showCover(kicker, title, copy, buttonText) {
+      dialogKicker.textContent = kicker;
+      dialogTitle.textContent = title;
+      dialogCopy.textContent = copy;
+      factList.replaceChildren();
+      factList.hidden = true;
+      eventContent.replaceChildren();
+      eventContent.hidden = true;
+      startButton.hidden = false;
+      startButton.disabled = false;
+      document.querySelector('.dialog').classList.toggle('report-dialog', state === 'over');
+      startButton.textContent = buttonText;
+      screenCover.hidden = false;
+      startButton.focus();
+    }
+
+    function adjustRisk(amount) {
+      risk = Math.max(0, Math.min(100, risk + amount));
+      updateHud();
+    }
+
+    function rememberEncounter(category) {
+      if (!category) return;
+      encounteredCategories.add(category);
+    }
+
+    function showDecision() {
+      currentDecision = decisionScenarios[Math.floor(Math.random() * decisionScenarios.length)];
+      rememberEncounter(currentDecision.category);
+      state = 'decision';
+      decisionTimer = 8;
+      showCover('QUICK DECISION · 8 SECONDS', 'What’s the safer move?', currentDecision.prompt, '');
+      startButton.hidden = true;
+      const timer = document.createElement('div');
+      timer.className = 'event-timer';
+      timer.id = 'decisionTimer';
+      timer.textContent = 'CHOOSE BEFORE THE TIMER RUNS OUT';
+      const choices = document.createElement('div');
+      choices.className = 'event-choices';
+      [currentDecision.safeChoice, currentDecision.riskyChoice].forEach((text, index) => {
+        const button = document.createElement('button');
+        button.className = 'event-choice';
+        button.type = 'button';
+        button.dataset.safeChoice = String(index === 0);
+        button.textContent = `${index === 0 ? 'A' : 'B'}. ${text}`;
+        choices.append(button);
+      });
+      eventContent.append(timer, choices);
+      eventContent.hidden = false;
+      choices.addEventListener('click', event => {
+        const choice = event.target.closest('[data-safe-choice]');
+        if (choice) resolveDecision(choice.dataset.safeChoice === 'true', false);
+      });
+      updateHud();
+      choices.querySelector('button')?.focus();
+    }
+
+    function resolveDecision(isSafe, timedOut) {
+      if (!currentDecision || state !== 'decision') return;
+      if (isSafe) {
+        safeDecisions += 1;
+        score += 100;
+        credits += 2;
+        adjustRisk(-14);
+      } else {
+        riskyDecisionCategories.add(currentDecision.category);
+        adjustRisk(timedOut ? 15 : 19);
+      }
+      if (isSafe && currentDecision.category === 'theft') runBadges.add('theft-smart');
+      if (isSafe && currentDecision.category === 'fire') runBadges.add('fire-ready');
+      decisionTimer = 7 + Math.random() * 4;
+      state = 'decisionFeedback';
+      showCover(isSafe ? 'SAFER CHOICE' : timedOut ? 'TIME RAN OUT' : 'RISK ALERT', isSafe ? 'Risk down, credits up.' : 'Reset and learn.', timedOut ? currentDecision.riskyFeedback : isSafe ? currentDecision.safeFeedback : currentDecision.riskyFeedback, 'Back to the road');
+      currentDecision = null;
+      updateHud();
+    }
+
+    function showIncidentScenario() {
+      state = 'incident';
+      rememberEncounter('collision');
+      showCover('MINOR COLLISION · CHECKLIST', 'What would you do?', 'A low-speed bump happened. Select the safe first steps, then review why documentation helps.', 'Complete checklist');
+      const checklist = document.createElement('div');
+      checklist.className = 'incident-checklist';
+      checklist.setAttribute('role', 'group');
+      checklist.setAttribute('aria-label', 'After a collision checklist');
+      const steps = [
+        'Move to a safer place if you can do so safely.',
+        'Check whether anyone is injured; contact emergency services if needed.',
+        'Exchange contact, vehicle, and insurance details with the other driver.',
+        'Take photos and write down what happened while details are fresh.',
+        'Contact the appropriate authorities or your insurer when the situation requires it.'
+      ];
+      steps.forEach((text, index) => {
+        const label = document.createElement('label');
+        label.className = 'incident-step';
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.dataset.incidentStep = String(index);
+        const span = document.createElement('span');
+        span.textContent = text;
+        label.append(input, span);
+        checklist.append(label);
+      });
+      eventContent.append(checklist);
+      eventContent.hidden = false;
+      checklist.querySelector('input')?.focus();
+      startButton.disabled = true;
+      checklist.addEventListener('change', () => {
+        startButton.disabled = checklist.querySelectorAll('input:checked').length < steps.length;
+      });
+      updateHud();
+    }
+
+    function completeIncidentChecklist() {
+      state = 'incidentReady';
+      safeDecisions += 1;
+      score += 50;
+      credits += 1;
+      adjustRisk(-6);
+      showCover('CLAIM READY', 'Good notes make follow-up easier.', 'Accurate photos, exchanged details, and a clear timeline can help when you report what happened. Contact authorities when needed and check your insurer’s instructions; rules vary by location and situation.', 'Back to the road');
+      updateHud();
+    }
+
+    function showInsuranceQuiz() {
+      const pickedTerm = pendingFacts[Math.floor(Math.random() * pendingFacts.length)];
+      currentQuestion = termQuestions[pickedTerm.term] || termQuestions.Liability;
+      state = 'quiz';
+      showCover('INSURANCE PIT STOP · 3 TERMS FOUND', 'Quick coverage check.', currentQuestion.question, '');
+      startButton.hidden = true;
+      const choices = document.createElement('div');
+      choices.className = 'event-choices';
+      currentQuestion.options.forEach(option => {
+        const button = document.createElement('button');
+        button.className = 'event-choice';
+        button.type = 'button';
+        button.dataset.quizAnswer = option;
+        button.textContent = option;
+        choices.append(button);
+      });
+      eventContent.append(choices);
+      eventContent.hidden = false;
+      choices.addEventListener('click', event => {
+        const answer = event.target.closest('[data-quiz-answer]');
+        if (answer) answerInsuranceQuestion(answer.dataset.quizAnswer, choices);
+      });
+      updateHud();
+      choices.querySelector('button')?.focus();
+    }
+
+    function answerInsuranceQuestion(answer, choices) {
+      if (state !== 'quiz') return;
+      const isCorrect = answer === currentQuestion.answer;
+      choices.querySelectorAll('button').forEach(button => {
+        button.disabled = true;
+        if (button.dataset.quizAnswer === currentQuestion.answer) button.classList.add('correct');
+        else if (button.dataset.quizAnswer === answer) button.classList.add('incorrect');
+      });
+      const feedback = document.createElement('p');
+      feedback.className = 'dialog-copy';
+      feedback.textContent = isCorrect
+        ? `Correct! ${currentQuestion.explanation}`
+        : `The best answer is ${currentQuestion.answer}. ${currentQuestion.explanation}`;
+      eventContent.append(feedback);
+      if (isCorrect) {
+        correctAnswers += 1;
+        score += 150;
+        credits += 3;
+        runBadges.add('coverage-scholar');
+        adjustRisk(-8);
+      }
+      state = 'quizAnswered';
+      currentQuestion = null;
+      startButton.hidden = false;
+      startButton.textContent = 'Back to the road';
+      startButton.focus();
+      updateHud();
+    }
+
+    function beginRun() {
+      lane = 1;
+      displayedLane = 1;
+      lives = 3;
+      credits = 0;
+      risk = 0;
+      hazardsAvoided = 0;
+      collisions = 0;
+      safeDecisions = 0;
+      correctAnswers = 0;
+      termsLearned = 0;
+      runBadges = new Set();
+      encounteredCategories = new Set();
+      discoveredTerms = new Set();
+      riskyDecisionCategories = new Set();
+      pendingFacts = [];
+      termDeck = shuffle(insuranceTerms);
+      termIndex = 0;
+      spawnCount = 0;
+      score = 0;
+      remaining = runDuration;
+      roadOffset = 0;
+      spawnTimer = 0.6;
+      decisionTimer = 6 + Math.random() * 2;
+      invulnerable = 0;
+      currentDecision = null;
+      currentQuestion = null;
+      objects = [];
+      particles = [];
+      state = 'running';
+      screenCover.hidden = true;
+      updateHud();
+    }
+
+    function addReportStat(parent, label, value) {
+      const item = document.createElement('div');
+      item.className = 'report-stat';
+      const strong = document.createElement('strong');
+      strong.textContent = value;
+      const caption = document.createElement('span');
+      caption.textContent = label;
+      item.append(strong, caption);
+      parent.append(item);
+    }
+
+    function getRunObservations(riskName) {
+      const observations = [];
+      if (riskyDecisionCategories.has('theft')) observations.push('You chose a risky parking move. Lock the vehicle, use a visible spot, and keep valuables out of sight. Auto insurance does not automatically cover personal belongings.');
+      else if (encounteredCategories.has('theft')) observations.push('You made a safer parking choice. Keep valuables out of sight and lock up; auto insurance does not automatically cover personal belongings.');
+      if (encounteredCategories.has('fire')) observations.push('You encountered a fire warning. If there is smoke or fire, stop somewhere safe, move away, and contact emergency services. Comprehensive may cover certain vehicle fire losses, depending on the policy.');
+      if (riskyDecisionCategories.has('distraction')) observations.push('You chose to look at your phone while driving. Put it out of reach and check it after parking safely.');
+      if (riskyDecisionCategories.has('fatigue')) observations.push('You chose to push through while drowsy. Stop somewhere safe, rest, or arrange another ride instead.');
+      if (collisions > 0) observations.push('You had a collision. Collision coverage may apply to damage to your own vehicle after a covered crash; check your policy and deductible.');
+      if (encounteredCategories.has('treeBranch')) observations.push('You encountered a fallen-branch hazard. Comprehensive coverage may apply to certain non-collision vehicle damage, depending on the policy and deductible.');
+      if (encounteredCategories.has('weather')) observations.push('You encountered slippery-weather risk. Slow down and leave extra space; comprehensive may cover some non-collision vehicle damage, subject to policy terms.');
+      if (hazardsAvoided > 0) observations.push(`You avoided ${hazardsAvoided} road ${hazardsAvoided === 1 ? 'hazard' : 'hazards'}; scanning ahead and changing lanes can help you react sooner.`);
+      if (safeDecisions < 2) observations.push('Try the timed safety choices next run. Small habits like avoiding phone distraction and parking thoughtfully can reduce everyday risks.');
+      if (correctAnswers > 0) observations.push(`You answered ${correctAnswers} insurance ${correctAnswers === 1 ? 'question' : 'questions'} correctly. Keep comparing coverage details, not just prices.`);
+      if (observations.length < 2) observations.push(`Your run finished at ${riskName} risk. Practice a few safe choices to build stronger habits.`);
+      return observations.slice(0, 3);
+    }
+
+    function renderDriverReport(newBest) {
+      const riskName = risk < 30 ? 'LOW' : risk < 65 ? 'MODERATE' : 'HIGH';
+      const badgeRules = [
+        ['risk-ready', riskName === 'LOW' && safeDecisions >= 3],
+        ['collision-conscious', collisions === 0 && hazardsAvoided >= 5],
+        ['coverage-scholar', correctAnswers >= 1],
+        ['campus-safety-pro', riskName === 'LOW' && safeDecisions >= 5 && collisions <= 1]
+      ];
+      for (const [id, earned] of badgeRules) if (earned) runBadges.add(id);
+      gameProgress.badges = [...new Set([...gameProgress.badges, ...runBadges])];
+      gameProgress.terms = [...new Set([...gameProgress.terms, ...discoveredTerms])];
+      gameProgress.encounters = [...new Set([...gameProgress.encounters, ...encounteredCategories])];
+      saveGameProgress();
+
+      const observations = getRunObservations(riskName);
+      const summary = {
+        score,
+        credits,
+        risk: riskName,
+        hazardsAvoided,
+        collisions,
+        safeDecisions,
+        correctAnswers,
+        termsLearned,
+        terms: [...discoveredTerms],
+        encounters: [...encounteredCategories],
+        riskyChoices: [...riskyDecisionCategories],
+        badges: [...runBadges],
+        observations
+      };
+      try {
+        localStorage.setItem('campus-dash-last-run', JSON.stringify(summary));
+      } catch {
+        // The report still works when browser storage is unavailable.
+      }
+
+      showCover('CAMPUS DASH · DRIVER REPORT', 'Your safety run.', `${newBest ? 'New best! ' : ''}Score ${score} · ${riskName} risk · ${credits} campus credits.`, 'PLAY AGAIN');
+      const grid = document.createElement('div');
+      grid.className = 'report-grid';
+      addReportStat(grid, 'Final score', String(score));
+      addReportStat(grid, 'Campus credits', String(credits));
+      addReportStat(grid, 'Risk level', riskName);
+      addReportStat(grid, 'Hazards avoided', String(hazardsAvoided));
+      addReportStat(grid, 'Collisions', String(collisions));
+      addReportStat(grid, 'Safe decisions', String(safeDecisions));
+      addReportStat(grid, 'Questions right', String(correctAnswers));
+      addReportStat(grid, 'Terms learned', String(termsLearned));
+
+      const observationTitle = document.createElement('div');
+      observationTitle.className = 'report-subhead';
+      observationTitle.textContent = 'YOUR RUN NOTES';
+      const observationList = document.createElement('ul');
+      observationList.className = 'report-observations';
+      observations.forEach(text => {
+        const item = document.createElement('li');
+        item.textContent = text;
+        observationList.append(item);
+      });
+
+      const badgeTitle = document.createElement('div');
+      badgeTitle.className = 'report-subhead';
+      badgeTitle.textContent = 'BADGES';
+      const badgeList = document.createElement('ul');
+      badgeList.className = 'report-badges';
+      const earnedBadges = badgeCatalog.filter(badge => runBadges.has(badge.id));
+      (earnedBadges.length ? earnedBadges : badgeCatalog.slice(0, 2)).forEach(badge => {
+        const item = document.createElement('li');
+        item.className = `report-badge${runBadges.has(badge.id) ? '' : ' locked'}`;
+        item.textContent = `${badge.icon} ${badge.name}${runBadges.has(badge.id) ? ' · EARNED' : ' · KEEP PRACTICING'}`;
+        badgeList.append(item);
+      });
+
+      const actions = document.createElement('div');
+      actions.className = 'report-actions';
+      const reviewLink = document.createElement('a');
+      reviewLink.className = 'report-link';
+      reviewLink.href = 'insurance-guide.html#riskcheck';
+      reviewLink.textContent = 'REVIEW MY RISKS';
+      const guideLink = document.createElement('a');
+      guideLink.className = 'report-link';
+      guideLink.href = 'insurance-guide.html';
+      guideLink.textContent = 'INSURANCE 101';
+      actions.append(reviewLink, guideLink);
+      eventContent.append(grid, observationTitle, observationList, badgeTitle, badgeList, actions);
+      eventContent.hidden = false;
+      updateHud();
+    }
+
+    function endRun() {
+      if (state === 'over') return;
+      state = 'over';
+      const newBest = score > bestScore;
+      if (newBest) {
+        bestScore = score;
+        saveBestScore();
+      }
+      updateHud();
+      renderDriverReport(newBest);
+    }
+
+    function togglePause() {
+      if (state === 'running') {
+        state = 'paused';
+        showCover('TAKE A BREATHER', 'Pit stop.', 'Your run is paused. Catch your breath, then jump back into the campus rush.', 'Resume run');
+      } else if (state === 'paused') {
+        state = 'running';
+        screenCover.hidden = true;
+      }
+      updateHud();
+    }
+
+    function steer(direction) {
+      if (state !== 'running') return;
+      lane = Math.max(0, Math.min(laneCount - 1, lane + direction));
+    }
+
+    function update(delta) {
+      if (state === 'decision') {
+        decisionTimer = Math.max(0, decisionTimer - delta);
+        const timer = document.getElementById('decisionTimer');
+        if (timer) timer.textContent = `CHOOSE NOW · ${Math.ceil(decisionTimer)} SECONDS`;
+        if (decisionTimer <= 0) resolveDecision(false, true);
+        return;
+      }
+      if (state !== 'running') return;
+      remaining = Math.max(0, remaining - delta);
+      roadOffset = (roadOffset + delta * height * 0.68) % 60;
+      displayedLane += (lane - displayedLane) * Math.min(1, delta * 13);
+      invulnerable = Math.max(0, invulnerable - delta);
+      score += Math.round(delta * 12);
+      decisionTimer -= delta;
+      if (decisionTimer <= 0) {
+        showDecision();
+        return;
+      }
+      spawnTimer -= delta;
+      if (spawnTimer <= 0) {
+        spawnObject();
+        spawnTimer = Math.max(0.5, 0.92 - (runDuration - remaining) * 0.006) + Math.random() * 0.28;
+      }
+
+      const road = roadGeometry();
+      const carY = height * 0.78;
+      const carWidth = Math.min(road.laneWidth * 0.43, 57);
+      const carHeight = carWidth * 1.62;
+      for (const item of objects) {
+        item.y += delta * height * 0.53;
+        if (item.passed) continue;
+        const hazard = item.type !== 'fact' && item.type !== 'token';
+        const collisionWindow = Math.abs(item.y - carY) <= carHeight * 0.48;
+        if (!collisionWindow) {
+          if (hazard && item.y > carY + carHeight * 0.48) {
+            item.passed = true;
+            hazardsAvoided += 1;
+            score += 25;
+            updateHud();
+          }
+          continue;
+        }
+        if (item.lane !== Math.round(displayedLane)) {
+          if (hazard) {
+            item.passed = true;
+            hazardsAvoided += 1;
+            score += 25;
+            updateHud();
+          }
+          continue;
+        }
+        item.passed = true;
+        const x = laneCenter(item.lane);
+        if (item.type === 'fact') {
+          pendingFacts.push(item.fact);
+          discoveredTerms.add(item.fact.term);
+          termsLearned += 1;
+          score += 60;
+          popParticles(x, item.y, '#8bdf50');
+          updateHud();
+          if (pendingFacts.length === 3) {
+            showInsuranceQuiz();
+            break;
+          }
+        } else if (item.type === 'token') {
+          credits += 1;
+          score += 125;
+          popParticles(x, item.y, '#f4d45d');
+        } else if (invulnerable === 0) {
+          collisions += 1;
+          encounteredCategories.add(item.type === 'branch' ? 'treeBranch' : item.type === 'wetRoad' ? 'weather' : item.type);
+          adjustRisk(item.type === 'pedestrian' || item.type === 'parked' ? 24 : 18);
+          lives -= 1;
+          invulnerable = 1.15;
+          popParticles(x, item.y, '#ff765f');
+          if (lives <= 0) {
+            endRun();
+            break;
+          }
+          if (['parked', 'pedestrian', 'branch'].includes(item.type) && Math.random() < 0.48) {
+            showIncidentScenario();
+            break;
+          }
+        }
+        updateHud();
+      }
+      objects = objects.filter(item => item.y < height + 50 && !item.passed);
+      for (const particle of particles) {
+        particle.x += particle.vx * delta;
+        particle.y += particle.vy * delta;
+        particle.life -= delta;
+      }
+      particles = particles.filter(particle => particle.life > 0);
+      if (remaining <= 0 && state === 'running') endRun();
+      updateHud();
+    }
+
+    function frame(timestamp) {
+      const delta = Math.min((timestamp - lastFrame) / 1000 || 0, 0.04);
+      lastFrame = timestamp;
+      update(delta);
+      draw();
+      requestAnimationFrame(frame);
+    }
+
+    startButton.addEventListener('click', () => {
+      if (state === 'paused') {
+        state = 'running';
+        screenCover.hidden = true;
+        updateHud();
+      } else if (state === 'decisionFeedback' || state === 'incidentReady') {
+        state = 'running';
+        screenCover.hidden = true;
+        updateHud();
+      } else if (state === 'incident') {
+        completeIncidentChecklist();
+      } else if (state === 'quizAnswered') {
+        pendingFacts = [];
+        state = 'running';
+        screenCover.hidden = true;
+        updateHud();
+      } else beginRun();
+    });
+    pauseButton.addEventListener('click', togglePause);
+    document.getElementById('restartButton').addEventListener('click', beginRun);
+    document.getElementById('leftButton').addEventListener('pointerdown', () => steer(-1));
+    document.getElementById('rightButton').addEventListener('pointerdown', () => steer(1));
+    window.addEventListener('keydown', event => {
+      const key = event.key.toLowerCase();
+      if (['arrowleft', 'arrowright', ' ', 'a', 'd'].includes(key)) event.preventDefault();
+      if (key === 'arrowleft' || key === 'a') steer(-1);
+      if (key === 'arrowright' || key === 'd') steer(1);
+      if (key === 'p' || key === ' ') togglePause();
+      if (key === 'r') beginRun();
+    });
+    window.addEventListener('resize', resizeCanvas);
+    new ResizeObserver(resizeCanvas).observe(canvas);
+
+    resizeCanvas();
+    updateHud();
+    requestAnimationFrame(frame);
+  </script>
+</body>
+</html>
